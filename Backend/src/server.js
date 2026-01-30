@@ -2,15 +2,28 @@ import express from "express";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
 import { connect } from "mongoose";
+import path from 'path'
 import cors from 'cors'
+import {serve} from "inngest/express"
+import { inngest,functions } from "./lib/inngest.js";
 const app=express()
 
 app.use(express.json())
 app.use(cors({origin:ENV.ClIENT_URL,Credentials:true}))
-
+const __dirname=path.resolve()
 app.get("/",(req,res)=>{
     res.status(200).json({msg:"success from api"})
 })
+
+if(ENV.NODE_ENV==="production"){
+    app.use(express.static(Path.join(__dirname,"../frontend/dist")))
+
+    app.get("/{*any",(req,res)=>{
+        res.sendFile(Path.join(__dirname,"../frontend","dist","indexedDB.html"))
+    })
+}
+
+app.use("/api/inngest",serve({client:inngest,functions}))
 
 const startServer= async ()=>{
     try{
