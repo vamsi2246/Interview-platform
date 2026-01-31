@@ -30,4 +30,7 @@ const sessionSchema=new mongoose.Schema({
         type:String,
         default:"",
     }
-})
+},{timestamps:true})
+
+const Session=mongoose.model("Session",sessionSchema);
+export default Session;
