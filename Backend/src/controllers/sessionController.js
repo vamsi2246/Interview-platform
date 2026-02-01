@@ -33,13 +33,17 @@ export async function createSession(req, res) {
     });
 
     await channel.create();
-
     res.status(201).json({ session });
+    
   } catch (error) {
     console.log("Error in createSession controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+
+
+
 
 export async function getActiveSessions(_, res) {
   try {
@@ -55,6 +59,10 @@ export async function getActiveSessions(_, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+
+
+
 
 export async function getMyRecentSessions(req, res) {
   try {
@@ -75,6 +83,9 @@ export async function getMyRecentSessions(req, res) {
   }
 }
 
+
+
+
 export async function getSessionById(req, res) {
   try {
     const { id } = req.params;
@@ -91,6 +102,8 @@ export async function getSessionById(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+
 
 export async function joinSession(req, res) {
   try {
@@ -125,6 +138,8 @@ export async function joinSession(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+
 
 export async function endSession(req, res) {
   try {
