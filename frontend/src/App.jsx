@@ -9,7 +9,8 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={!isSignedIn?<HomePage />:<Navigate to={"/dashboard"}/>}/>
+        <Route path="/dashboard" element={isSignedIn?<dashboardPage />:<Navigate to={"/"}/>}/>
         <Route path="/problems" element={isSignedIn ? <Problemspage /> : <Navigate to={"/"} />} />
       </Routes>
 
