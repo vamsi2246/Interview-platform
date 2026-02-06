@@ -3,9 +3,13 @@ import HomePage from './pages/HomePage.jsx';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Problemspage from './pages/Problemspage.jsx';
 import { Toaster } from "react-hot-toast"
+import dashboardPage from './pages/dashboardPage.jsx'
 
 function App() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn,isLoaded } = useUser();
+
+  if (!isLoaded) return null;
+
   return (
     <>
       <Routes>
