@@ -9,6 +9,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 if (!PUBLISHABLE_KEY) {
+  const root = document.getElementById('root');
+  if (root) {
+    root.innerHTML = '<div style="min-h-screen flex items-center justify-center text-red-500 font-bold p-10">Missing Clerk Publishable Key. Please check your .env file.</div>';
+  }
   throw new Error('Missing Clerk Publishable Key')
 }
 

@@ -1,21 +1,25 @@
 import { useUser } from '@clerk/clerk-react';
 import HomePage from './pages/HomePage.jsx';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Problemspage from './pages/Problemspage.jsx';
+import ProblemsPage from './pages/ProblemsPage.jsx';
 import { Toaster } from "react-hot-toast"
-import dashboardPage from './pages/dashboardPage.jsx'
+import DashboardPage from './pages/DashboardPage.jsx'
 
 function App() {
-  const { isSignedIn,isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
 
-  if (!isLoaded) return null;
+  if (!isLoaded) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <span className="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  );
 
   return (
     <>
       <Routes>
-        <Route path="/" element={!isSignedIn?<HomePage />:<Navigate to={"/dashboard"}/>}/>
-        <Route path="/dashboard" element={isSignedIn?<dashboardPage />:<Navigate to={"/"}/>}/>
-        <Route path="/problems" element={isSignedIn ? <Problemspage /> : <Navigate to={"/"} />} />
+        <Route path="/" element={!isSignedIn ? <HomePage /> : <Navigate to={"/dashboard"} />} />
+        <Route path="/dashboard" element={isSignedIn ? <DashboardPage /> : <Navigate to={"/"} />} />
+        <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
       </Routes>
 
       <Toaster position="top-right" />
