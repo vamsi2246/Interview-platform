@@ -99,6 +99,10 @@ class Solution {
   
 }
 
+
+
+
+
 // Test cases
 let test1 = ["h","e","l","l","o"];
 reverseString(test1);
@@ -340,6 +344,9 @@ print(maxArea([1,1]))  # Expected: 1`,
     },
   },
 };
+
+
+
 
 export const LANGUAGE_CONFIG = {
   javascript: {
