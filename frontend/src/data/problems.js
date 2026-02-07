@@ -357,7 +357,7 @@ export const LANGUAGE_CONFIG = {
   python: {
     name: "Python",
     icon: "/python.png",
-    monacoLang: "python",
+    monacoLang: "python",                  
   },
   java: {
     name: "Java",
