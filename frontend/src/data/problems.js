@@ -343,6 +343,170 @@ print(maxArea([1,1]))  # Expected: 1`,
       java: "49\n1",
     },
   },
+  "longest-substring-without-repeating": {
+  id: "longest-substring-without-repeating",
+  title: "Longest Substring Without Repeating Characters",
+  difficulty: "Medium",
+  category: "String • Sliding Window",
+  description: {
+    text: "Given a string s, find the length of the longest substring without repeating characters.",
+    notes: [],
+  },
+  examples: [
+    { input: 's = "abcabcbb"', output: "3", explanation: "The answer is 'abc'." },
+    { input: 's = "bbbbb"', output: "1" },
+    { input: 's = "pwwkew"', output: "3" },
+  ],
+  constraints: ["0 ≤ s.length ≤ 5 * 10⁴"],
+  starterCode: {
+    javascript: `function lengthOfLongestSubstring(s) {
+
+}`,
+    python: `def lengthOfLongestSubstring(s):
+    pass`,
+    java: `class Solution {
+    public static int lengthOfLongestSubstring(String s) {
+        return 0;
+    }
+}`,
+  },
+  expectedOutput: {
+    javascript: "3\n1\n3",
+    python: "3\n1\n3",
+    java: "3\n1\n3",
+  },
+},
+
+"merge-sorted-array": {
+  id: "merge-sorted-array",
+  title: "Merge Sorted Array",
+  difficulty: "Easy",
+  category: "Array • Two Pointers",
+  description: {
+    text: "Merge two sorted arrays into one sorted array.",
+    notes: [],
+  },
+  examples: [
+    { input: "nums1=[1,2,3], nums2=[2,5,6]", output: "[1,2,2,3,5,6]" },
+  ],
+  constraints: [],
+  starterCode: {
+    javascript: `function merge(nums1, nums2) {
+
+}`,
+    python: `def merge(nums1, nums2):
+    pass`,
+    java: `class Solution {
+    public static int[] merge(int[] nums1,int[] nums2){
+        return new int[0];
+    }
+}`,
+  },
+  expectedOutput: {
+    javascript: "[1,2,2,3,5,6]",
+    python: "[1,2,2,3,5,6]",
+    java: "[1,2,2,3,5,6]",
+  },
+},
+
+"binary-search": {
+  id: "binary-search",
+  title: "Binary Search",
+  difficulty: "Easy",
+  category: "Array • Binary Search",
+  description: {
+    text: "Given a sorted array and a target, return its index or -1 if not found.",
+    notes: [],
+  },
+  examples: [
+    { input: "nums=[-1,0,3,5,9,12], target=9", output: "4" },
+  ],
+  constraints: [],
+  starterCode: {
+    javascript: `function search(nums, target) {
+
+}`,
+    python: `def search(nums, target):
+    pass`,
+    java: `class Solution {
+    public static int search(int[] nums,int target){
+        return -1;
+    }
+}`,
+  },
+  expectedOutput: {
+    javascript: "4",
+    python: "4",
+    java: "4",
+  },
+},
+
+"valid-parentheses": {
+  id: "valid-parentheses",
+  title: "Valid Parentheses",
+  difficulty: "Easy",
+  category: "Stack • String",
+  description: {
+    text: "Given a string containing just (), {}, [], determine if the input string is valid.",
+    notes: [],
+  },
+  examples: [
+    { input: 's = "()"', output: "true" },
+    { input: 's = "(]"', output: "false" },
+  ],
+  constraints: [],
+  starterCode: {
+    javascript: `function isValid(s) {
+
+}`,
+    python: `def isValid(s):
+    pass`,
+    java: `class Solution {
+    public static boolean isValid(String s){
+        return false;
+    }
+}`,
+  },
+  expectedOutput: {
+    javascript: "true\nfalse",
+    python: "True\nFalse",
+    java: "true\nfalse",
+  },
+},
+
+"climbing-stairs": {
+  id: "climbing-stairs",
+  title: "Climbing Stairs",
+  difficulty: "Easy",
+  category: "Dynamic Programming",
+  description: {
+    text: "You are climbing stairs. Each time you can climb 1 or 2 steps. How many distinct ways to reach the top?",
+    notes: [],
+  },
+  examples: [
+    { input: "n = 2", output: "2" },
+    { input: "n = 3", output: "3" },
+  ],
+  constraints: ["1 ≤ n ≤ 45"],
+  starterCode: {
+    javascript: `function climbStairs(n) {
+
+}`,
+    python: `def climbStairs(n):
+    pass`,
+    java: `class Solution {
+    public static int climbStairs(int n){
+        return 0;
+    }
+}`,
+  },
+  expectedOutput: {
+    javascript: "2\n3",
+    python: "2\n3",
+    java: "2\n3",
+  },
+},
+
 };
 
 
