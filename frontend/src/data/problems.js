@@ -401,6 +401,7 @@ print(maxArea([1,1]))  # Expected: 1`,
         return new int[0];
     }
 }`,
+
   },
   expectedOutput: {
     javascript: "[1,2,2,3,5,6]",
@@ -408,6 +409,7 @@ print(maxArea([1,1]))  # Expected: 1`,
     java: "[1,2,2,3,5,6]",
   },
 },
+
 
 "binary-search": {
   id: "binary-search",
@@ -440,6 +442,7 @@ print(maxArea([1,1]))  # Expected: 1`,
     java: "4",
   },
 },
+
 
 "valid-parentheses": {
   id: "valid-parentheses",
@@ -474,6 +477,7 @@ print(maxArea([1,1]))  # Expected: 1`,
   },
 },
 
+
 "climbing-stairs": {
   id: "climbing-stairs",
   title: "Climbing Stairs",
@@ -507,7 +511,17 @@ print(maxArea([1,1]))  # Expected: 1`,
   },
 },
 
+
 };
+
+
+
+
+
+
+
+
+
 
 
 export const LANGUAGE_CONFIG = {
