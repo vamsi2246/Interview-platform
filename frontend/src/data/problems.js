@@ -510,8 +510,6 @@ print(maxArea([1,1]))  # Expected: 1`,
 };
 
 
-
-
 export const LANGUAGE_CONFIG = {
   javascript: {
     name: "JavaScript",
