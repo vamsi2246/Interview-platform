@@ -71,7 +71,7 @@ function ProblemsPage() {
             <div className="stats stats-vertical lg:stats-horizontal">
               <div className="stat">
                 <div className="stat-title">Total Problems</div>
-                <div className="stat-value text-primary">{problems.length}</div>
+                <div className="stat-value text-secondary">{problems.length}</div>
               </div>
 
               <div className="stat">

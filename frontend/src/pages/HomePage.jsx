@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -6,7 +6,8 @@ import {
   SparklesIcon,
   UsersIcon,
   VideoIcon,
-  ZapIcon,PawPrint
+  ZapIcon,
+  PawPrint
 } from "lucide-react";
 import { SignInButton } from "@clerk/clerk-react";
 
@@ -179,4 +180,4 @@ function HomePage() {
     </div>
   );
 }
-export default HomePage;
+export default HomePage;         
