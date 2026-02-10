@@ -74,6 +74,13 @@ function ProblemPage() {
       .join("\n");
   };
 
+  const checkIfTestsPassed = (actualOutput, expectedOutput) => {
+    const normalizedActual = normalizeOutput(actualOutput);
+    const normalizedExpected = normalizeOutput(expectedOutput);
+
+    return normalizedActual == normalizedExpected;
+  };
+
 
 
 
