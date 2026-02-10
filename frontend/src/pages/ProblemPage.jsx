@@ -80,9 +80,78 @@ function ProblemPage() {
 
     return normalizedActual == normalizedExpected;
   };
+  const handleRunCode = async () => {
+    setIsRunning(true);
+    setOutput(null);
 
+    const result = await executeCode(selectedLanguage, code);
+    setOutput(result);
+    setIsRunning(false);
 
+    // check if code executed successfully and matches expected output
 
+    if (result.success) {
+      const expectedOutput = currentProblem.expectedOutput[selectedLanguage];
+      const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
+      if (testsPassed) {
+        triggerConfetti();
+        toast.success("All tests passed! Great job!");
+      } else {
+        toast.error("Tests failed. Check your output!");
+      }
+    } else {
+      toast.error("Code execution failed!");
+    }
+  };
+
+  return (
+    <div className="h-screen bg-base-100 flex flex-col">
+      <Navbar />
+
+      <div className="flex-1">
+        <PanelGroup direction="horizontal">
+          {/* left panel- problem desc */}
+          <Panel defaultSize={40} minSize={30}>
+            <ProblemDescription
+              problem={currentProblem}
+              currentProblemId={currentProblemId}
+              onProblemChange={handleProblemChange}
+              allProblems={Object.values(PROBLEMS)}
+            />
+          </Panel>
+
+          <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
+
+          {/* right panel- code editor & output */}
+          <Panel defaultSize={60} minSize={30}>
+            <PanelGroup direction="vertical">
+              {/* Top panel - Code editor */}
+              <Panel defaultSize={70} minSize={30}>
+                <CodeEditorPanel
+                  selectedLanguage={selectedLanguage}
+                  code={code}
+                  isRunning={isRunning}
+                  onLanguageChange={handleLanguageChange}
+                  onCodeChange={setCode}
+                  onRunCode={handleRunCode}
+                />
+              </Panel>
+
+              <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
+
+              {/* Bottom panel - Output Panel*/}
+
+              <Panel defaultSize={30} minSize={30}>
+                <OutputPanel output={output} />
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      </div>
+    </div>
+  );
 
 }
+
+export default ProblemPage;
