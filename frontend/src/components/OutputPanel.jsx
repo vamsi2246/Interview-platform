@@ -5,3 +5,5 @@ export const OutputPanel = () => {
     <div>OutputPanel</div>
   )
 }
+
+export default OutputPanel;

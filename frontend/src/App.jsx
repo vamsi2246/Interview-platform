@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProblemsPage from './pages/ProblemsPage.jsx';
 import { Toaster } from "react-hot-toast"
 import DashboardPage from './pages/DashboardPage.jsx'
+import ProblemPage from './pages/ProblemPage.jsx'
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
