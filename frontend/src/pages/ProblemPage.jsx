@@ -42,6 +42,8 @@ function ProblemPage() {
   const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`);
 
 
+
+  
   const triggerConfetti = () => {
     confetti({
       particleCount: 80,
@@ -55,6 +57,10 @@ function ProblemPage() {
       origin: { x: 0.8, y: 0.6 },
     });
   };
+
+
+
+
 
    const normalizeOutput = (output) => {
     // normalize output for comparison (trim whitespace, handle different spacing)
@@ -74,12 +80,18 @@ function ProblemPage() {
       .join("\n");
   };
 
+
+
   const checkIfTestsPassed = (actualOutput, expectedOutput) => {
     const normalizedActual = normalizeOutput(actualOutput);
     const normalizedExpected = normalizeOutput(expectedOutput);
 
     return normalizedActual == normalizedExpected;
   };
+
+
+
+
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
@@ -154,4 +166,4 @@ function ProblemPage() {
 
 }
 
-export default ProblemPage;
+export default ProblemPage;           
