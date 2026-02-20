@@ -1,6 +1,6 @@
 import React from 'react'
 
-const RecentSessions = () => {
+function RecentSessions() {
   return (
     <div>RecentSessions</div>
   )
