@@ -10,7 +10,7 @@ const LANGUAGE_IDS = {
   java: 62,       // Java (OpenJDK 13.0.1)
 };
 
-export async function executeCode(language, code) {
+export async function executeCode(language, code, stdin = "") {
   try {
     const languageId = LANGUAGE_IDS[language];
 
@@ -32,6 +32,7 @@ export async function executeCode(language, code) {
         body: JSON.stringify({
           language_id: languageId,
           source_code: code,
+          stdin: stdin || "",
         }),
       }
     );
