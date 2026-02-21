@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
@@ -44,9 +44,13 @@ function ProblemPage() {
       PROBLEMS[currentProblemId]?.starterCode?.[selectedLanguage] ||
       "// No starter code available.";
     setCode(fresh);
-    codeRef.current = fresh;
     setOutput(null);
   }
+
+  // keep ref in sync after render
+  useEffect(() => {
+    codeRef.current = code;
+  }, [code]);
 
   function handleLanguageChange(e) {
     const lang = e.target.value;
@@ -54,7 +58,6 @@ function ProblemPage() {
     const fresh =
       currentProblem?.starterCode?.[lang] || "// No starter code available.";
     setCode(fresh);
-    codeRef.current = fresh;
     setOutput(null);
   }
 
@@ -128,7 +131,7 @@ function ProblemPage() {
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <PanelGroup direction="horizontal">
           {/* problem description */}
           <Panel defaultSize={40} minSize={30}>
