@@ -511,6 +511,177 @@ print(maxArea([1,1]))  # Expected: 1`,
   },
 },
 
+"best-time-to-buy-sell-stock": {
+  id: "best-time-to-buy-sell-stock",
+  title: "Best Time to Buy and Sell Stock",
+  difficulty: "Easy",
+  category: "Array • Greedy",
+  description: {
+    text: "You are given an array prices where prices[i] is the price of a given stock on the ith day.",
+    notes: ["Return the maximum profit you can achieve."]
+  },
+  examples: [
+    { input: "prices = [7,1,5,3,6,4]", output: "5" },
+    { input: "prices = [7,6,4,3,1]", output: "0" }
+  ]
+},
+
+"move-zeroes": {
+  id: "move-zeroes",
+  title: "Move Zeroes",
+  difficulty: "Easy",
+  category: "Array • Two Pointers",
+  description: {
+    text: "Given an integer array nums, move all 0's to the end while maintaining the relative order of the non-zero elements.",
+    notes: ["You must do this in-place without making a copy of the array."]
+  },
+  examples: [
+    { input: "nums = [0,1,0,3,12]", output: "[1,3,12,0,0]" },
+    { input: "nums = [0]", output: "[0]" }
+  ],
+  constraints: ["1 ≤ nums.length ≤ 10⁴"],
+},
+
+"group-anagrams": {
+  id: "group-anagrams",
+  title: "Group Anagrams",
+  difficulty: "Medium",
+  category: "Hash Map • String",
+  description: {
+    text: "Given an array of strings strs, group the anagrams together.",
+    notes: []
+  },
+  examples: [
+    { input: '["eat","tea","tan","ate","nat","bat"]', output: '[["eat","tea","ate"],["tan","nat"],["bat"]]' }
+  ]
+},
+
+"contains-duplicate": {
+  id: "contains-duplicate",
+  title: "Contains Duplicate",
+  difficulty: "Easy",
+  category: "Array • Hash Set",
+  description: {
+    text: "Given an integer array nums, return true if any value appears at least twice.",
+    notes: []
+  },
+  examples: [
+    { input: "nums = [1,2,3,1]", output: "true" },
+    { input: "nums = [1,2,3,4]", output: "false" }
+  ]
+},
+
+"linked-list-cycle": {
+  id: "linked-list-cycle",
+  title: "Linked List Cycle",
+  difficulty: "Easy",
+  category: "Linked List • Two Pointers",
+  description: {
+    text: "Given head of a linked list, determine if the linked list has a cycle.",
+    notes: []
+  }
+},
+
+"kth-largest-element": {
+  id: "kth-largest-element",
+  title: "Kth Largest Element in an Array",
+  difficulty: "Medium",
+  category: "Heap • Quickselect",
+  description: {
+    text: "Given an integer array nums and an integer k, return the kth largest element.",
+    notes: []
+  },
+  examples: [
+    { input: "nums = [3,2,1,5,6,4], k = 2", output: "5" }
+  ]
+},
+"top-k-frequent-elements": {
+  id: "top-k-frequent-elements",
+  title: "Top K Frequent Elements",
+  difficulty: "Medium",
+  category: "Hash Map • Heap",
+  description: {
+    text: "Given an integer array nums and an integer k, return the k most frequent elements.",
+    notes: []
+  },
+  examples: [
+    { input: "nums = [1,1,1,2,2,3], k = 2", output: "[1,2]" }
+  ]
+},
+
+"min-stack": {
+  id: "min-stack",
+  title: "Min Stack",
+  difficulty: "Medium",
+  category: "Stack",
+  description: {
+    text: "Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.",
+    notes: []
+  }
+},
+"implement-queue-using-stacks": {
+  id: "implement-queue-using-stacks",
+  title: "Implement Queue using Stacks",
+  difficulty: "Easy",
+  category: "Queue",
+  description: {
+    text: "Implement a FIFO queue using only two stacks.",
+    notes: []
+  }
+},
+"find-peak-element": {
+  id: "find-peak-element",
+  title: "Find Peak Element",
+  difficulty: "Medium",
+  category: "Binary Search",
+  description: {
+    text: "A peak element is greater than its neighbors. Return the index of any peak element.",
+    notes: ["Must run in O(log n)."]
+  }
+},
+"maximum-depth-binary-tree": {
+  id: "maximum-depth-binary-tree",
+  title: "Maximum Depth of Binary Tree",
+  difficulty: "Easy",
+  category: "Tree",
+  description: {
+    text: "Given the root of a binary tree, return its maximum depth.",
+    notes: []
+  }
+},
+"number-of-islands": {
+  id: "number-of-islands",
+  title: "Number of Islands",
+  difficulty: "Medium",
+  category: "Graph • DFS/BFS",
+  description: {
+    text: "Given a 2D grid of '1's (land) and '0's (water), count the number of islands.",
+    notes: []
+  }
+},
+"coin-change": {
+  id: "coin-change",
+  title: "Coin Change",
+  difficulty: "Medium",
+  category: "Dynamic Programming",
+  description: {
+    text: "Given coins of different denominations and an amount, return the fewest number of coins needed.",
+    notes: ["Return -1 if not possible."]
+  },
+  examples: [
+    { input: "coins=[1,2,5], amount=11", output: "3" }
+  ]
+},
+"jump-game": {
+  id: "jump-game",
+  title: "Jump Game",
+  difficulty: "Medium",
+  category: "Greedy",
+  description: {
+    text: "Given an array nums, determine if you can reach the last index.",
+    notes: []
+  }
+}
 
 };
 
