@@ -1,142 +1,128 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { PROBLEMS } from "../data/problems";
-import Navbar from "../components/Navbar";
+import confetti from "canvas-confetti";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import ProblemDescription from "../components/ProblemDescription";
-import OutputPanel from "../components/OutputPanel";
-import CodeEditorPanel from "../components/CodeEditorPanel";
+import { PROBLEMS } from "../data/problems";
 import { executeCode } from "../lib/piston";
-import confetti from "canvas-confetti";
+
+import Navbar from "../components/Navbar";
+import ProblemDescription from "../components/ProblemDescription";
+import CodeEditorPanel from "../components/CodeEditorPanel";
+import OutputPanel from "../components/OutputPanel";
 
 function ProblemPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Derive the problem ID directly from the URL param — no effect needed
   const currentProblemId = id && PROBLEMS[id] ? id : "two-sum";
+  const currentProblem = PROBLEMS[currentProblemId];
+
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(
-    PROBLEMS[currentProblemId]?.starterCode?.javascript ||
-    "// No starter code available for this problem yet."
+    currentProblem?.starterCode?.javascript || "// No starter code available."
   );
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [customInput, setCustomInput] = useState("");
 
-  // Keep a ref to always have the latest code for handleRunCode
+  // ref keeps latest code so handleRunCode never sends stale content
   const codeRef = useRef(code);
-  const handleCodeChange = useCallback((newCode) => {
-    if (newCode !== undefined) {
-      codeRef.current = newCode;
-      setCode(newCode);
-    }
+
+  const updateCode = useCallback((val) => {
+    if (val === undefined) return;
+    codeRef.current = val;
+    setCode(val);
   }, []);
 
-  const currentProblem = PROBLEMS[currentProblemId];
-
-  // Reset code & output when the problem changes (URL navigation)
-  const [prevProblemId, setPrevProblemId] = useState(currentProblemId);
-  if (prevProblemId !== currentProblemId) {
-    setPrevProblemId(currentProblemId);
-    const newCode =
+  // reset editor when switching problems via dropdown
+  const [prevId, setPrevId] = useState(currentProblemId);
+  if (prevId !== currentProblemId) {
+    setPrevId(currentProblemId);
+    const fresh =
       PROBLEMS[currentProblemId]?.starterCode?.[selectedLanguage] ||
-      "// No starter code available for this problem yet.";
-    setCode(newCode);
-    codeRef.current = newCode;
+      "// No starter code available.";
+    setCode(fresh);
+    codeRef.current = fresh;
     setOutput(null);
   }
 
-  const handleLanguageChange = (e) => {
-    const newLang = e.target.value;
-    setSelectedLanguage(newLang);
-    const newCode =
-      currentProblem?.starterCode?.[newLang] ||
-      "// No starter code available for this problem yet.";
-    setCode(newCode);
-    codeRef.current = newCode;
+  function handleLanguageChange(e) {
+    const lang = e.target.value;
+    setSelectedLanguage(lang);
+    const fresh =
+      currentProblem?.starterCode?.[lang] || "// No starter code available.";
+    setCode(fresh);
+    codeRef.current = fresh;
     setOutput(null);
-  };
+  }
 
-  const handleProblemChange = (newProblemId) =>
-    navigate(`/problem/${newProblemId}`);
+  function handleProblemChange(newId) {
+    navigate(`/problem/${newId}`);
+  }
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 80,
-      spread: 250,
-      origin: { x: 0.2, y: 0.6 },
-    });
+  // ── run & check ──────────────────────────────────
 
-    confetti({
-      particleCount: 80,
-      spread: 250,
-      origin: { x: 0.8, y: 0.6 },
-    });
-  };
-
-  const normalizeOutput = (output) => {
-    // normalize output for comparison (trim whitespace, handle different spacing)
-    return output
-      .trim()
-      .split("\n")
-      .map((line) =>
-        line
-          .trim()
-          // remove spaces after [ and before ]
-          .replace(/\[\s+/g, "[")
-          .replace(/\s+\]/g, "]")
-          // normalize spaces around commas to single space after comma
-          .replace(/\s*,\s*/g, ",")
-      )
-      .filter((line) => line.length > 0)
-      .join("\n");
-  };
-
-  const checkIfTestsPassed = (actualOutput, expectedOutput) => {
-    const normalizedActual = normalizeOutput(actualOutput);
-    const normalizedExpected = normalizeOutput(expectedOutput);
-
-    return normalizedActual === normalizedExpected;
-  };
-
-  const handleRunCode = async () => {
+  async function handleRunCode() {
     setIsRunning(true);
     setOutput(null);
 
-    // Always read from the ref for latest code
     const result = await executeCode(
       selectedLanguage,
       codeRef.current,
       customInput
     );
+
     setOutput(result);
     setIsRunning(false);
 
-    // check if code executed successfully and matches expected output
-    if (result.success) {
-      const expectedOutput =
-        currentProblem?.expectedOutput?.[selectedLanguage];
-      if (!expectedOutput) {
-        toast("No expected output defined for this problem yet.", {
-          icon: "ℹ️",
-        });
-        return;
-      }
-      const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
-
-      if (testsPassed) {
-        triggerConfetti();
-        toast.success("All tests passed! Great job!");
-      } else {
-        toast.error("Tests failed. Check your output!");
-      }
-    } else {
+    if (!result.success) {
       toast.error("Code execution failed!");
+      return;
     }
-  };
+
+    const expected = currentProblem?.expectedOutput?.[selectedLanguage];
+    if (!expected) {
+      toast("No expected output for this problem yet.", { icon: "ℹ️" });
+      return;
+    }
+
+    if (matchesExpected(result.output, expected)) {
+      fireConfetti();
+      toast.success("All tests passed! Great job!");
+    } else {
+      toast.error("Tests failed. Check your output!");
+    }
+  }
+
+  // ── helpers ──────────────────────────────────────
+
+  function normalize(text) {
+    return text
+      .trim()
+      .split("\n")
+      .map((ln) =>
+        ln
+          .trim()
+          .replace(/\[\s+/g, "[")
+          .replace(/\s+]/g, "]")
+          .replace(/\s*,\s*/g, ",")
+      )
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  function matchesExpected(actual, expected) {
+    return normalize(actual) === normalize(expected);
+  }
+
+  function fireConfetti() {
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.2, y: 0.6 } });
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.8, y: 0.6 } });
+  }
+
+  // ── render ───────────────────────────────────────
 
   return (
     <div className="h-screen bg-base-100 flex flex-col">
@@ -144,7 +130,7 @@ function ProblemPage() {
 
       <div className="flex-1">
         <PanelGroup direction="horizontal">
-          {/* left panel- problem desc */}
+          {/* problem description */}
           <Panel defaultSize={40} minSize={30}>
             <ProblemDescription
               problem={currentProblem}
@@ -156,24 +142,21 @@ function ProblemPage() {
 
           <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
 
-          {/* right panel- code editor & output */}
+          {/* code editor + output */}
           <Panel defaultSize={60} minSize={30}>
             <PanelGroup direction="vertical">
-              {/* Top panel - Code editor */}
               <Panel defaultSize={70} minSize={30}>
                 <CodeEditorPanel
                   selectedLanguage={selectedLanguage}
                   code={code}
                   isRunning={isRunning}
                   onLanguageChange={handleLanguageChange}
-                  onCodeChange={handleCodeChange}
+                  onCodeChange={updateCode}
                   onRunCode={handleRunCode}
                 />
               </Panel>
 
               <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
-
-              {/* Bottom panel - Output Panel*/}
 
               <Panel defaultSize={30} minSize={20}>
                 <OutputPanel
