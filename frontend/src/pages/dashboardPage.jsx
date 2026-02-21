@@ -1,102 +1,86 @@
+import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import Navbar from "../components/Navbar";
-import { Code2Icon, PlayIcon, TrendingUpIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useActiveSessions, useCreateSession, useMyRecentSessions } from "../hooks/useSessions";
 
-const DashboardPage = () => {
+import Navbar from "../components/Navbar";
+import WelcomeSection from "../components/WelcomeSection";
+import StatsCards from "../components/StatsCards";
+import ActiveSessions from "../components/ActiveSessions";
+import RecentSessions from "../components/RecentSessions";
+import CreateSessionModal from "../components/CreateSessionModal";
+
+function DashboardPage() {
+  const navigate = useNavigate();
   const { user } = useUser();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
+
+  const createSessionMutation = useCreateSession();
+
+  const { data: activeSessionsData, isLoading: loadingActiveSessions } = useActiveSessions();
+  const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
+
+  const handleCreateRoom = () => {
+    if (!roomConfig.problem || !roomConfig.difficulty) return;
+
+    createSessionMutation.mutate(
+      {
+        problem: roomConfig.problem,
+        difficulty: roomConfig.difficulty.toLowerCase(),
+      },
+      {
+        onSuccess: (data) => {
+          setShowCreateModal(false);
+          navigate(`/session/${data.session._id}`);
+        },
+      }
+    );
+  };
+
+  const activeSessions = activeSessionsData?.sessions || [];
+  const recentSessions = recentSessionsData?.sessions || [];
+
+  const isUserInSession = (session) => {
+    if (!user.id) return false;
+
+    return session.host?.clerkId === user.id || session.participant?.clerkId === user.id;
+  };
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <Navbar />
+    <>
+      <div className="min-h-screen bg-base-300">
+        <Navbar />
+        <WelcomeSection onCreateSession={() => setShowCreateModal(true)} />
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* WELCOME SECTION */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">
-            Welcome back, <span className="text-primary">{user?.firstName || "Coder"}</span>! 👋
-          </h1>
-          <p className="text-base-content/70 text-lg">
-            Ready to tackle some new challenges today?
-          </p>
+        {/* Grid layout */}
+        <div className="container mx-auto px-6 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <StatsCards
+              activeSessionsCount={activeSessions.length}
+              recentSessionsCount={recentSessions.length}
+            />
+            <ActiveSessions
+              sessions={activeSessions}
+              isLoading={loadingActiveSessions}
+              isUserInSession={isUserInSession}
+            />
+          </div>
+
+          <RecentSessions sessions={recentSessions} isLoading={loadingRecentSessions} />
         </div>
-
-        {/* QUICK STATS/ACTIONS GRID */}
-        <div className="grid md:grid-cols-3 gap-8">
-
-          {/* ACTION CARD 1: PRACTICE */}
-          <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-base-content/5">
-            <div className="card-body">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                  <Code2Icon className="size-8" />
-                </div>
-                <h2 className="card-title text-2xl">Practice</h2>
-              </div>
-              <p className="text-base-content/70 mb-6">
-                Sharpen your skills with our curated list of coding problems.
-              </p>
-              <div className="card-actions justify-end">
-                <Link to="/problems" className="btn btn-primary w-full">
-                  Solve Problems
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* ACTION CARD 2: INTERVIEW */}
-          <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-base-content/5">
-            <div className="card-body">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-secondary/10 text-secondary">
-                  <PlayIcon className="size-8" />
-                </div>
-                <h2 className="card-title text-2xl">Mock Interview</h2>
-              </div>
-              <p className="text-base-content/70 mb-6">
-                Start a live mock interview session with a peer or AI.
-              </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-secondary w-full">Start Session</button>
-              </div>
-            </div>
-          </div>
-
-          {/* ACTION CARD 3: PROGRESS */}
-          <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-base-content/5">
-            <div className="card-body">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-accent/10 text-accent">
-                  <TrendingUpIcon className="size-8" />
-                </div>
-                <h2 className="card-title text-2xl">Your Progress</h2>
-              </div>
-              <p className="text-base-content/70 mb-6">
-                Track your solved problems and interview performance.
-              </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-accent w-full">View Stats</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* RECENT ACTIVITY (Placeholder) */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-bold mb-6">Recent Activity</h3>
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <div className="text-center py-8 text-base-content/60">
-                No recent activity found. Start solving problems to see your progress!
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
-    </div>
+
+      <CreateSessionModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        roomConfig={roomConfig}
+        setRoomConfig={setRoomConfig}
+        onCreateRoom={handleCreateRoom}
+        isCreating={createSessionMutation.isPending}
+      />
+    </>
   );
-};
+}
 
 export default DashboardPage;
