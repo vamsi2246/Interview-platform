@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useState, useRef, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { PROBLEMS } from "../data/problems";
 import Navbar from "../components/Navbar";
@@ -18,9 +18,22 @@ function ProblemPage() {
   // Derive the problem ID directly from the URL param — no effect needed
   const currentProblemId = id && PROBLEMS[id] ? id : "two-sum";
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(PROBLEMS[currentProblemId]?.starterCode?.javascript || "// No starter code available for this problem yet.");
+  const [code, setCode] = useState(
+    PROBLEMS[currentProblemId]?.starterCode?.javascript ||
+    "// No starter code available for this problem yet."
+  );
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [customInput, setCustomInput] = useState("");
+
+  // Keep a ref to always have the latest code for handleRunCode
+  const codeRef = useRef(code);
+  const handleCodeChange = useCallback((newCode) => {
+    if (newCode !== undefined) {
+      codeRef.current = newCode;
+      setCode(newCode);
+    }
+  }, []);
 
   const currentProblem = PROBLEMS[currentProblemId];
 
@@ -28,23 +41,27 @@ function ProblemPage() {
   const [prevProblemId, setPrevProblemId] = useState(currentProblemId);
   if (prevProblemId !== currentProblemId) {
     setPrevProblemId(currentProblemId);
-    setCode(PROBLEMS[currentProblemId]?.starterCode?.[selectedLanguage] || "// No starter code available for this problem yet.");
+    const newCode =
+      PROBLEMS[currentProblemId]?.starterCode?.[selectedLanguage] ||
+      "// No starter code available for this problem yet.";
+    setCode(newCode);
+    codeRef.current = newCode;
     setOutput(null);
   }
-
-
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(currentProblem?.starterCode?.[newLang] || "// No starter code available for this problem yet.");
+    const newCode =
+      currentProblem?.starterCode?.[newLang] ||
+      "// No starter code available for this problem yet.";
+    setCode(newCode);
+    codeRef.current = newCode;
     setOutput(null);
   };
 
-  const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`);
-
-
-
+  const handleProblemChange = (newProblemId) =>
+    navigate(`/problem/${newProblemId}`);
 
   const triggerConfetti = () => {
     confetti({
@@ -59,10 +76,6 @@ function ProblemPage() {
       origin: { x: 0.8, y: 0.6 },
     });
   };
-
-
-
-
 
   const normalizeOutput = (output) => {
     // normalize output for comparison (trim whitespace, handle different spacing)
@@ -82,33 +95,34 @@ function ProblemPage() {
       .join("\n");
   };
 
-
-
   const checkIfTestsPassed = (actualOutput, expectedOutput) => {
     const normalizedActual = normalizeOutput(actualOutput);
     const normalizedExpected = normalizeOutput(expectedOutput);
 
-    return normalizedActual == normalizedExpected;
+    return normalizedActual === normalizedExpected;
   };
-
-
-
 
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
+    // Always read from the ref for latest code
+    const result = await executeCode(
+      selectedLanguage,
+      codeRef.current,
+      customInput
+    );
     setOutput(result);
     setIsRunning(false);
 
     // check if code executed successfully and matches expected output
-
     if (result.success) {
-      const expectedOutput = currentProblem?.expectedOutput?.[selectedLanguage];
+      const expectedOutput =
+        currentProblem?.expectedOutput?.[selectedLanguage];
       if (!expectedOutput) {
-        toast.info("No expected output defined for this problem yet.");
-        setIsRunning(false);
+        toast("No expected output defined for this problem yet.", {
+          icon: "ℹ️",
+        });
         return;
       }
       const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
@@ -152,7 +166,7 @@ function ProblemPage() {
                   code={code}
                   isRunning={isRunning}
                   onLanguageChange={handleLanguageChange}
-                  onCodeChange={setCode}
+                  onCodeChange={handleCodeChange}
                   onRunCode={handleRunCode}
                 />
               </Panel>
@@ -161,8 +175,12 @@ function ProblemPage() {
 
               {/* Bottom panel - Output Panel*/}
 
-              <Panel defaultSize={30} minSize={30}>
-                <OutputPanel output={output} />
+              <Panel defaultSize={30} minSize={20}>
+                <OutputPanel
+                  output={output}
+                  customInput={customInput}
+                  onCustomInputChange={setCustomInput}
+                />
               </Panel>
             </PanelGroup>
           </Panel>
@@ -170,7 +188,6 @@ function ProblemPage() {
       </div>
     </div>
   );
-
 }
 
-export default ProblemPage;           
+export default ProblemPage;
