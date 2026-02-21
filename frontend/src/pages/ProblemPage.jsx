@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import toast from "react-hot-toast";
 import { PROBLEMS } from "../data/problems";
 import Navbar from "../components/Navbar";
 
@@ -8,34 +9,35 @@ import ProblemDescription from "../components/ProblemDescription";
 import OutputPanel from "../components/OutputPanel";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import { executeCode } from "../lib/piston";
+import confetti from "canvas-confetti";
 
 function ProblemPage() {
-     const { id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [currentProblemId, setCurrentProblemId] = useState("two-sum");
+  // Derive the problem ID directly from the URL param — no effect needed
+  const currentProblemId = id && PROBLEMS[id] ? id : "two-sum";
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(PROBLEMS[currentProblemId].starterCode.javascript);
+  const [code, setCode] = useState(PROBLEMS[currentProblemId]?.starterCode?.javascript || "// No starter code available for this problem yet.");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
   const currentProblem = PROBLEMS[currentProblemId];
 
-  
-  useEffect(() => {
-    if (id && PROBLEMS[id]) {
-      setCurrentProblemId(id);
-      setCode(PROBLEMS[id].starterCode[selectedLanguage]);
-      setOutput(null);
-    }
-  }, [id, selectedLanguage]);
+  // Reset code & output when the problem changes (URL navigation)
+  const [prevProblemId, setPrevProblemId] = useState(currentProblemId);
+  if (prevProblemId !== currentProblemId) {
+    setPrevProblemId(currentProblemId);
+    setCode(PROBLEMS[currentProblemId]?.starterCode?.[selectedLanguage] || "// No starter code available for this problem yet.");
+    setOutput(null);
+  }
 
 
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(currentProblem.starterCode[newLang]);
+    setCode(currentProblem?.starterCode?.[newLang] || "// No starter code available for this problem yet.");
     setOutput(null);
   };
 
@@ -43,7 +45,7 @@ function ProblemPage() {
 
 
 
-  
+
   const triggerConfetti = () => {
     confetti({
       particleCount: 80,
@@ -62,7 +64,7 @@ function ProblemPage() {
 
 
 
-   const normalizeOutput = (output) => {
+  const normalizeOutput = (output) => {
     // normalize output for comparison (trim whitespace, handle different spacing)
     return output
       .trim()
@@ -103,7 +105,12 @@ function ProblemPage() {
     // check if code executed successfully and matches expected output
 
     if (result.success) {
-      const expectedOutput = currentProblem.expectedOutput[selectedLanguage];
+      const expectedOutput = currentProblem?.expectedOutput?.[selectedLanguage];
+      if (!expectedOutput) {
+        toast.info("No expected output defined for this problem yet.");
+        setIsRunning(false);
+        return;
+      }
       const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
       if (testsPassed) {
