@@ -1,4 +1,35 @@
 @import "tailwindcss";
-@plugin "daisyui"{
+
+@plugin "daisyui" {
     themes: all
+}
+
+/* ── Neon-dark theme (overrides DaisyUI "dark") ── */
+[data-theme="dark"] {
+    --color-primary: #00e5a0;
+    --color-primary-content: #0a0a0f;
+    --color-secondary: #00e5a0;
+    --color-secondary-content: #0a0a0f;
+    --color-accent: #00c9ff;
+    --color-accent-content: #0a0a0f;
+    --color-neutral: #1a1a2e;
+    --color-neutral-content: #e0e0e0;
+    --color-base-100: #0a0a0f;
+    --color-base-200: #111118;
+    --color-base-300: #1a1a2e;
+    --color-base-content: #e0e0e0;
+    --color-success: #00e5a0;
+    --color-error: #ff4757;
+    --color-warning: #ffa502;
+    --color-info: #00c9ff;
+}
+
+/* ── Lofi light theme (keep defaults, override what you want) ── */
+[data-theme="lofi"] {
+    --color-primary: #0a0a0f;
+    --color-primary-content: #ffffff;
+    --color-secondary: #1a1a2e;
+    --color-secondary-content: #ffffff;
+    --color-accent: #00b386;
+    --color-accent-content: #ffffff;
 }
