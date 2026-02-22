@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Loader2Icon, PlayIcon } from "lucide-react";
 import { LANGUAGE_CONFIG } from "../data/problems";
@@ -11,27 +10,6 @@ function CodeEditorPanel({
   onCodeChange,
   onRunCode,
 }) {
-  const [editorTheme, setEditorTheme] = useState("vs-dark");
-
-  // sync editor theme with app theme
-  useEffect(() => {
-    function syncTheme() {
-      const appTheme = document.documentElement.getAttribute("data-theme");
-      setEditorTheme(appTheme === "light" ? "light" : "vs-dark");
-    }
-
-    syncTheme();
-
-    // watch for theme changes on <html> element
-    const observer = new MutationObserver(syncTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="h-full bg-base-300 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 bg-base-100 border-t border-base-300">
@@ -41,11 +19,7 @@ function CodeEditorPanel({
             alt={LANGUAGE_CONFIG[selectedLanguage].name}
             className="size-6"
           />
-          <select
-            className="select select-sm"
-            value={selectedLanguage}
-            onChange={onLanguageChange}
-          >
+          <select className="select select-sm" value={selectedLanguage} onChange={onLanguageChange}>
             {Object.entries(LANGUAGE_CONFIG).map(([key, lang]) => (
               <option key={key} value={key}>
                 {lang.name}
@@ -54,11 +28,7 @@ function CodeEditorPanel({
           </select>
         </div>
 
-        <button
-          className="btn btn-primary btn-sm gap-2"
-          disabled={isRunning}
-          onClick={onRunCode}
-        >
+        <button className="btn btn-primary btn-sm gap-2" disabled={isRunning} onClick={onRunCode}>
           {isRunning ? (
             <>
               <Loader2Icon className="size-4 animate-spin" />
@@ -75,11 +45,11 @@ function CodeEditorPanel({
 
       <div className="flex-1">
         <Editor
-          height="100%"
+          height={"100%"}
           language={LANGUAGE_CONFIG[selectedLanguage].monacoLang}
           value={code}
           onChange={onCodeChange}
-          theme={editorTheme}
+          theme="vs-dark"
           options={{
             fontSize: 16,
             lineNumbers: "on",
@@ -92,5 +62,4 @@ function CodeEditorPanel({
     </div>
   );
 }
-
-export default CodeEditorPanel;
+export default CodeEditorPanel;             
