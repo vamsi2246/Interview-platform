@@ -1,6 +1,23 @@
 import { chatClient, streamClient } from "../lib/stream.js";
 import Session from "../models/Session.js";
 
+export async function getStreamToken(req, res) {
+  try {
+    const userId = req.user.clerkId;
+    const token = streamClient.generateUserToken({ user_id: userId });
+
+    res.status(200).json({
+      token,
+      userId,
+      userName: req.user.name,
+      userImage: req.user.profileImage,
+    });
+  } catch (error) {
+    console.log("Error in getStreamToken controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export async function createSession(req, res) {
   try {
     const { problem, difficulty } = req.body;
