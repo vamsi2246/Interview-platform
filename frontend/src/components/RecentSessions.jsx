@@ -3,10 +3,11 @@ import {
   Code2Icon,
   HistoryIcon,
   LoaderIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
-function RecentSessions({ sessions, isLoading }) {
+function RecentSessions({ sessions, isLoading, onDeleteSession, currentUserId }) {
   return (
     <div className="mt-6 card bg-base-100 border-2 border-secondary/20 hover:border-secondary/30">
       <div className="card-body">
@@ -69,8 +70,18 @@ function RecentSessions({ sessions, isLoading }) {
                     </div>
                   </div>
 
-                  {/* Status badge */}
-                  <span className="badge badge-ghost badge-sm">Completed</span>
+                  <div className="flex items-center gap-2">
+                    <span className="badge badge-ghost badge-sm">Completed</span>
+                    {session.host?.clerkId === currentUserId && (
+                      <button
+                        onClick={() => onDeleteSession(session._id)}
+                        className="btn btn-ghost btn-sm btn-square text-error hover:bg-error/20"
+                        title="Delete session"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
-import { useActiveSessions, useCreateSession, useMyRecentSessions } from "../hooks/useSessions";
+import { useActiveSessions, useCreateSession, useMyRecentSessions, useDeleteSession } from "../hooks/useSessions";
+import { useQueryClient } from "@tanstack/react-query";
 
 import Navbar from "../components/Navbar";
 import WelcomeSection from "../components/WelcomeSection";
@@ -17,6 +18,19 @@ function DashboardPage() {
   const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
 
   const createSessionMutation = useCreateSession();
+  const deleteSessionMutation = useDeleteSession();
+  const queryClient = useQueryClient();
+
+  const handleDeleteSession = (sessionId) => {
+    if (confirm("Are you sure you want to delete this session? This cannot be undone.")) {
+      deleteSessionMutation.mutate(sessionId, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["activeSessions"] });
+          queryClient.invalidateQueries({ queryKey: ["myRecentSessions"] });
+        },
+      });
+    }
+  };
 
   const { data: activeSessionsData, isLoading: loadingActiveSessions } = useActiveSessions();
   const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
@@ -64,10 +78,17 @@ function DashboardPage() {
               sessions={activeSessions}
               isLoading={loadingActiveSessions}
               isUserInSession={isUserInSession}
+              onDeleteSession={handleDeleteSession}
+              currentUserId={user?.id}
             />
           </div>
 
-          <RecentSessions sessions={recentSessions} isLoading={loadingRecentSessions} />
+          <RecentSessions
+            sessions={recentSessions}
+            isLoading={loadingRecentSessions}
+            onDeleteSession={handleDeleteSession}
+            currentUserId={user?.id}
+          />
         </div>
       </div>
 

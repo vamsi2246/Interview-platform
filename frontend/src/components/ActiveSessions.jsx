@@ -6,11 +6,12 @@ import {
   UsersIcon,
   ZapIcon,
   LoaderIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { Link } from "react-router";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
-function ActiveSessions({ sessions, isLoading, isUserInSession }) {
+function ActiveSessions({ sessions, isLoading, isUserInSession, onDeleteSession, currentUserId }) {
   return (
     <div className="lg:col-span-2 card bg-base-100 border-2 border-primary/20 hover:border-primary/30 h-full">
       <div className="card-body">
@@ -81,14 +82,25 @@ function ActiveSessions({ sessions, isLoading, isUserInSession }) {
                     </div>
                   </div>
 
-                  {session.participant && !isUserInSession(session) ? (
-                    <button className="btn btn-disabled btn-sm">Full</button>
-                  ) : (
-                    <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
-                      {isUserInSession(session) ? "Rejoin" : "Join"}
-                      <ArrowRightIcon className="size-4" />
-                    </Link>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {session.participant && !isUserInSession(session) ? (
+                      <button className="btn btn-disabled btn-sm">Full</button>
+                    ) : (
+                      <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
+                        {isUserInSession(session) ? "Rejoin" : "Join"}
+                        <ArrowRightIcon className="size-4" />
+                      </Link>
+                    )}
+                    {session.host?.clerkId === currentUserId && (
+                      <button
+                        onClick={() => onDeleteSession(session._id)}
+                        className="btn btn-ghost btn-sm btn-square text-error hover:bg-error/20"
+                        title="Delete session"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

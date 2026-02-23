@@ -63,3 +63,14 @@ export const useEndSession = () => {
 
   return result;
 };
+
+export const useDeleteSession = () => {
+  const result = useMutation({
+    mutationKey: ["deleteSession"],
+    mutationFn: sessionApi.deleteSession,
+    onSuccess: () => toast.success("Session deleted successfully!"),
+    onError: (error) => toast.error(error.response?.data?.message || "Failed to delete session"),
+  });
+
+  return result;
+};
