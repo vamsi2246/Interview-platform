@@ -277,7 +277,7 @@ function SessionPage() {
                 </div>
               ) : (
                 <div className="h-full">
-                  <VideoCallUI chatClient={chatClient} channel={channel} />
+                  <VideoCallUI streamClient={streamClient} call={call} chatClient={chatClient} channel={channel} />
                 </div>
               )}
             </div>
