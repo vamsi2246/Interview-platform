@@ -35,4 +35,9 @@ export const sessionApi = {
         const res = await axiosInstance.post(`/session/${id}/end`);
         return res.data;
     },
+
+    deleteSession: async (id) => {
+        const res = await axiosInstance.delete(`/session/${id}`);
+        return res.data;
+    },
 };

@@ -82,6 +82,8 @@ export async function getMyRecentSessions(req, res) {
       status: "completed",
       $or: [{ host: userId }, { participant: userId }],
     })
+      .populate("host", "name clerkId")
+      .populate("participant", "name clerkId")
       .sort({ createdAt: -1 })
       .limit(20);
 
