@@ -28,7 +28,11 @@ function WelcomeSection({ onCreateSession }) {
                     </div>
 
                     {/* Right: Create button */}
-                    <button className="btn btn-primary gap-2" onClick={onCreateSession}>
+                    <button
+                        className="btn gap-2 text-white border-none"
+                        style={{ backgroundColor: "#38bdf8" }}
+                        onClick={onCreateSession}
+                    >
                         <PlusIcon className="size-5" />
                         Create Session
                     </button>

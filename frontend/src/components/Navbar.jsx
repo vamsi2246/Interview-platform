@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon,Eye } from "lucide-react";
+import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon, Eye } from "lucide-react";
 import { UserButton } from "@clerk/clerk-react";
 import ThemeController from "./ThemeController";
 
@@ -54,11 +54,12 @@ function Navbar() {
             to={"/dashboard"}
             className={`px-4 py-2.5 rounded-lg transition-all duration-200 
               ${isActive("/dashboard")
-                ? "bg-primary text-primary-content"
+                ? "text-white"
                 : "hover:bg-base-200 text-base-content/70 hover:text-base-content"
               }
               
               `}
+            style={isActive("/dashboard") ? { backgroundColor: "#38bdf8" } : {}}
           >
             <div className="flex items-center gap-x-2.5">
               <LayoutDashboardIcon className="size-4" />
