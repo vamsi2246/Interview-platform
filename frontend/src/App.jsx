@@ -1,13 +1,22 @@
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { useEffect } from 'react';
 import HomePage from './pages/HomePage.jsx';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProblemsPage from './pages/ProblemsPage.jsx';
 import { Toaster } from "react-hot-toast"
 import DashboardPage from './pages/DashboardPage.jsx'
 import ProblemPage from './pages/ProblemPage.jsx'
+import SessionPage from './pages/SessionPage.jsx'
+import { setClerkGetToken } from './lib/axios';
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
+  const { getToken } = useAuth();
+
+  // Wire up Clerk auth token to axios
+  useEffect(() => {
+    setClerkGetToken(getToken);
+  }, [getToken]);
 
   if (!isLoaded) return (
     <div className="flex items-center justify-center min-h-screen">

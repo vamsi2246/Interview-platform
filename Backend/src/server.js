@@ -4,30 +4,30 @@ import { connectDB } from "./lib/db.js";
 import { connect } from "mongoose";
 import path from 'path'
 import cors from 'cors'
-import {serve} from "inngest/express"
-import { inngest,functions } from "./lib/inngest.js";
+import { serve } from "inngest/express"
+import { inngest, functions } from "./lib/inngest.js";
 import { clerkMiddleware } from '@clerk/express'
 import { protectRoute } from "./middlewares/protectRoute.js";
 import chatRoutes from "./routes/chatRoutes.js"
 import sessionRoutes from "./routes/sessionRoutes.js"
 
-const app=express()
+const app = express()
 
 app.use(express.json())
-app.use(cors({origin:ENV.ClIENT_URL,Credentials:true}))
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }))
 app.use(clerkMiddleware())
-app.use("/api/inngest",serve({client:inngest,functions}))
-app.use("/api/chat",chatRoutes)
-app.use("/api/session",sessionRoutes)
-const __dirname=path.resolve()
+app.use("/api/inngest", serve({ client: inngest, functions }))
+app.use("/api/chat", chatRoutes)
+app.use("/api/session", sessionRoutes)
+const __dirname = path.resolve()
 
 
-app.get("/",(req,res)=>{
-    res.status(200).json({msg:"success from api"})
+app.get("/", (req, res) => {
+    res.status(200).json({ msg: "success from api" })
 })
 
-app.get("/video",protectRoute,(req,res)=>{
-    res.status(200).json({msg:"Video call is On"})
+app.get("/video", protectRoute, (req, res) => {
+    res.status(200).json({ msg: "Video call is On" })
 })
 
 // if(ENV.NODE_ENV==="production"){
@@ -40,15 +40,15 @@ app.get("/video",protectRoute,(req,res)=>{
 
 
 
-const startServer= async ()=>{
-    try{
+const startServer = async () => {
+    try {
         await connectDB()
-        app.listen(ENV.PORT,()=>{
-        console.log("server running on port:",ENV.PORT)
-})
-    }catch(error){
+        app.listen(ENV.PORT, () => {
+            console.log("server running on port:", ENV.PORT)
+        })
+    } catch (error) {
         console.error("Error in starting the server")
     }
-    
+
 }
 startServer()
