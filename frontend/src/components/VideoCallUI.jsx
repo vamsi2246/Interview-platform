@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 function CallControls() {
-    const { useMicrophoneState, useCameraState, useScreenShareState, useCallCallingState } =
+    const { useMicrophoneState, useCameraState, useScreenShareState } =
         useCallStateHooks();
 
     const { microphone, isMute: isMicMuted } = useMicrophoneState();
