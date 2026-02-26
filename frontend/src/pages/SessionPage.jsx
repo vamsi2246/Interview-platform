@@ -27,8 +27,10 @@ function SessionPage() {
   const endSessionMutation = useEndSession();
 
   const session = sessionData?.session;
-  const isHost = session?.host?.clerkId === user?.id;
-  const isParticipant = session?.participant?.clerkId === user?.id;
+  // Check if user is host. They could be populated (host.clerkId) or unpopulated (host string ObjectId)
+  // or it could be evaluating against the MongoDB _id. Let's make it robust against both Clerk ID and Mongo ID.
+  const isHost = session?.host?.clerkId === user?.id || session?.host === user?.id;
+  const isParticipant = session?.participant?.clerkId === user?.id || session?.participant === user?.id;
 
   const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
     session,
