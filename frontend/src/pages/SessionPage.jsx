@@ -7,9 +7,10 @@ import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Loader2Icon, LogOutIcon, PhoneOffIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon, PhoneOffIcon, LinkIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
+import toast from "react-hot-toast";
 
 import useStreamClient from "../hooks/useStreamClient";
 import VideoCallUI from "../components/VideoCallUI";
@@ -96,6 +97,11 @@ function SessionPage() {
     }
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Session link copied to clipboard!");
+  };
+
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
@@ -133,6 +139,16 @@ function SessionPage() {
                           {session?.difficulty.slice(0, 1).toUpperCase() +
                             session?.difficulty.slice(1) || "Easy"}
                         </span>
+                        
+                        <button
+                          onClick={handleCopyLink}
+                          className="btn btn-outline btn-sm gap-2"
+                          title="Copy Session Link"
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                          Share
+                        </button>
+
                         {isHost && session?.status === "active" && (
                           <button
                             onClick={handleEndSession}
