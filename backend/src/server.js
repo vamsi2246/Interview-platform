@@ -14,10 +14,19 @@ import sessionRoutes from "./routes/sessionRoutes.js"
 const app = express()
 
 app.use(express.json())
-const allowedOrigins = [ENV.CLIENT_URL, "http://localhost:5173", "http://localhost:5174"]
+const allowedOrigins = [
+    ENV.CLIENT_URL,
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://interview-platform-sud3-git-main-vamsis-projects-362513cb.vercel.app"
+]
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow all origins in production for Vercel preview URLs, 
+        // or check against a dynamic regex pattern if needed.
+        // For now, we will allow any origin that includes 'vercel.app' 
+        // as well as the explicitly allowed origins.
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('vercel.app')) {
             callback(null, true)
         } else {
             callback(new Error("Not allowed by CORS"))
