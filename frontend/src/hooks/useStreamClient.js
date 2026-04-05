@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
 import { initializeStreamClient, disconnectStreamClient } from "../lib/stream";
@@ -11,10 +11,11 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
   const [channel, setChannel] = useState(null);
   const [isInitializingCall, setIsInitializingCall] = useState(true);
 
-  useEffect(() => {
-    let videoCall = null;
-    let chatClientInstance = null;
+  // Refs to track instances for cleanup and leaveSession
+  const videoCallRef = useRef(null);
+  const chatClientRef = useRef(null);
 
+  useEffect(() => {
     const initCall = async () => {
       if (!session?.callId) return;
       if (!isHost && !isParticipant) return;
@@ -34,12 +35,13 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
 
         setStreamClient(client);
 
-        videoCall = client.call("default", session.callId);
+        const videoCall = client.call("default", session.callId);
         await videoCall.join({ create: true });
         setCall(videoCall);
+        videoCallRef.current = videoCall;
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
-        chatClientInstance = StreamChat.getInstance(apiKey);
+        const chatClientInstance = StreamChat.getInstance(apiKey);
 
         await chatClientInstance.connectUser(
           {
@@ -50,6 +52,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
           token
         );
         setChatClient(chatClientInstance);
+        chatClientRef.current = chatClientInstance;
 
         const chatChannel = chatClientInstance.channel("messaging", session.callId);
         await chatChannel.watch();
@@ -64,13 +67,12 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
 
     if (session && !loadingSession) initCall();
 
-    // cleanup - performance reasons
+    // cleanup on unmount
     return () => {
-      // iife
       (async () => {
         try {
-          if (videoCall) await videoCall.leave();
-          if (chatClientInstance) await chatClientInstance.disconnectUser();
+          if (videoCallRef.current) await videoCallRef.current.leave();
+          if (chatClientRef.current) await chatClientRef.current.disconnectUser();
           await disconnectStreamClient();
         } catch (error) {
           console.error("Cleanup error:", error);
@@ -79,12 +81,35 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
     };
   }, [session, loadingSession, isHost, isParticipant]);
 
+  // Explicit leave function for "Leave Session" button
+  const leaveSession = useCallback(async () => {
+    try {
+      if (videoCallRef.current) {
+        await videoCallRef.current.leave();
+        videoCallRef.current = null;
+      }
+      if (chatClientRef.current) {
+        await chatClientRef.current.disconnectUser();
+        chatClientRef.current = null;
+      }
+      await disconnectStreamClient();
+
+      setCall(null);
+      setChatClient(null);
+      setChannel(null);
+      setStreamClient(null);
+    } catch (error) {
+      console.error("Error leaving session:", error);
+    }
+  }, []);
+
   return {
     streamClient,
     call,
     chatClient,
     channel,
     isInitializingCall,
+    leaveSession,
   };
 }
 

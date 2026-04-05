@@ -7,7 +7,14 @@ import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Loader2Icon, LogOutIcon, PhoneOffIcon, LinkIcon, LogInIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  LogOutIcon,
+  PhoneOffIcon,
+  LinkIcon,
+  LogInIcon,
+  DoorOpenIcon,
+} from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
 import toast from "react-hot-toast";
@@ -21,6 +28,7 @@ function SessionPage() {
   const { user, isSignedIn } = useUser();
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [customInput, setCustomInput] = useState("");
 
   const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
 
@@ -28,12 +36,10 @@ function SessionPage() {
   const endSessionMutation = useEndSession();
 
   const session = sessionData?.session;
-  // Check if user is host. They could be populated (host.clerkId) or unpopulated (host string ObjectId)
-  // or it could be evaluating against the MongoDB _id. Let's make it robust against both Clerk ID and Mongo ID.
   const isHost = isSignedIn && (session?.host?.clerkId === user?.id || session?.host === user?.id);
   const isParticipant = isSignedIn && (session?.participant?.clerkId === user?.id || session?.participant === user?.id);
 
-  const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
+  const { call, channel, chatClient, isInitializingCall, streamClient, leaveSession } = useStreamClient(
     session,
     loadingSession,
     isHost,
@@ -54,8 +60,6 @@ function SessionPage() {
     if (isHost || isParticipant) return;
 
     joinSessionMutation.mutate(id, { onSuccess: refetch });
-
-    // remove the joinSessionMutation, refetch from dependencies to avoid infinite loop
   }, [session, user, isSignedIn, loadingSession, isHost, isParticipant, id]);
 
   // redirect the "participant" when session ends
@@ -75,7 +79,6 @@ function SessionPage() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    // use problem-specific starter code
     const starterCode = problemData?.starterCode?.[newLang] || "";
     setCode(starterCode);
     setOutput(null);
@@ -85,15 +88,22 @@ function SessionPage() {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
+    const result = await executeCode(selectedLanguage, code, customInput);
     setOutput(result);
     setIsRunning(false);
   };
 
   const handleEndSession = () => {
     if (confirm("Are you sure you want to end this session? All participants will be notified.")) {
-      // this will navigate the HOST to dashboard
       endSessionMutation.mutate(id, { onSuccess: () => navigate("/dashboard") });
+    }
+  };
+
+  const handleLeaveSession = async () => {
+    if (confirm("Are you sure you want to leave this session?")) {
+      await leaveSession();
+      toast.success("You have left the session.");
+      navigate(isSignedIn ? "/dashboard" : "/");
     }
   };
 
@@ -106,7 +116,7 @@ function SessionPage() {
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
 
-      {/* Guest banner — shown when user is not signed in */}
+      {/* Guest banner */}
       {!isSignedIn && (
         <div className="bg-warning/10 border-b border-warning/30 px-4 py-3 flex items-center justify-center gap-3">
           <LogInIcon className="w-5 h-5 text-warning" />
@@ -145,7 +155,7 @@ function SessionPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap justify-end">
                         <span
                           className={`badge badge-lg ${getDifficultyBadgeClass(
                             session?.difficulty
@@ -164,6 +174,18 @@ function SessionPage() {
                           Share
                         </button>
 
+                        {/* Leave Session — for participants (not host) */}
+                        {isParticipant && session?.status === "active" && (
+                          <button
+                            onClick={handleLeaveSession}
+                            className="btn btn-warning btn-sm gap-2"
+                          >
+                            <DoorOpenIcon className="w-4 h-4" />
+                            Leave
+                          </button>
+                        )}
+
+                        {/* End Session — for host only */}
                         {isHost && session?.status === "active" && (
                           <button
                             onClick={handleEndSession}
@@ -277,7 +299,11 @@ function SessionPage() {
                   <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
                   <Panel defaultSize={30} minSize={15}>
-                    <OutputPanel output={output} />
+                    <OutputPanel
+                      output={output}
+                      customInput={customInput}
+                      onCustomInputChange={setCustomInput}
+                    />
                   </Panel>
                 </PanelGroup>
               </Panel>
@@ -290,7 +316,6 @@ function SessionPage() {
           <Panel defaultSize={50} minSize={30}>
             <div className="h-full bg-base-200 p-4 overflow-auto">
               {!isSignedIn ? (
-                /* Guest view — prompt to sign in for video/chat */
                 <div className="h-full flex items-center justify-center">
                   <div className="card bg-base-100 shadow-xl max-w-md">
                     <div className="card-body items-center text-center">
