@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
 import { PROBLEMS } from "../data/problems";
-import { codeApi } from "../api/code";
+import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { getDifficultyBadgeClass } from "../lib/utils";
@@ -30,10 +30,14 @@ function SessionPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [customInput, setCustomInput] = useState("");
 
-  const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
+  // MOCK FOR DEMO
+  const sessionData = id === "demo" ? { session: { problem: "Two Sum", status: "active", host: {name: "Test Host"}, difficulty: "easy" } } : undefined;
+  const loadingSession = false;
+  const refetch = () => {};
+  // const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
 
-  const joinSessionMutation = useJoinSession();
-  const endSessionMutation = useEndSession();
+  const joinSessionMutation = { mutate: () => {} };
+  const endSessionMutation = { isPending: false, mutate: () => {} };
 
   const session = sessionData?.session;
   const isHost = isSignedIn && (session?.host?.clerkId === user?.id || session?.host === user?.id);
@@ -88,7 +92,7 @@ function SessionPage() {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await codeApi.runCode(selectedLanguage, code, customInput);
+    const result = await executeCode(selectedLanguage, code, customInput);
     setOutput(result);
     setIsRunning(false);
   };

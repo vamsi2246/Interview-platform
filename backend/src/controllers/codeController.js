@@ -1,9 +1,5 @@
-// Judge0 CE API for code execution
-// Replaces the old Piston API which was shut down on Feb 15, 2026
-
 const JUDGE0_API = "https://ce.judge0.com";
 
-// Judge0 language IDs for supported languages
 const LANGUAGE_IDS = {
   javascript: 63, // Node.js 12.14.0
   python: 71,     // Python 3.8.1
@@ -11,38 +7,41 @@ const LANGUAGE_IDS = {
   cpp: 54,        // C++ (GCC 9.2.0)
 };
 
-export async function executeCode(language, code, stdin = "") {
+export const runCodeController = async (req, res) => {
   try {
+    const { language, code, stdin } = req.body;
+
+    if (!language || !code) {
+      return res.status(400).json({ success: false, error: "Language and code are required." });
+    }
+
     const languageId = LANGUAGE_IDS[language];
 
     if (!languageId) {
-      return {
+      return res.status(400).json({
         success: false,
         error: `Unsupported language: ${language}`,
-      };
+      });
     }
 
     // Submit code for execution with wait=true to get result immediately
-    const response = await fetch(
-      `${JUDGE0_API}/submissions?base64_encoded=false&wait=true`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language_id: languageId,
-          source_code: code,
-          stdin: stdin || "",
-        }),
-      }
-    );
+    const response = await fetch(`${JUDGE0_API}/submissions?base64_encoded=false&wait=true`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        language_id: languageId,
+        source_code: code,
+        stdin: stdin || "",
+      }),
+    });
 
     if (!response.ok) {
-      return {
+      return res.status(response.status).json({
         success: false,
         error: `HTTP error! status: ${response.status}`,
-      };
+      });
     }
 
     const data = await response.json();
@@ -55,48 +54,49 @@ export async function executeCode(language, code, stdin = "") {
 
     // Status 6 = Compilation Error
     if (statusId === 6) {
-      return {
+      return res.status(200).json({
         success: false,
         output: "",
         error: compileOutput || "Compilation error",
-      };
+      });
     }
 
     // Status 11 = Runtime Error (NZEC), or other error statuses > 3
     if (stderr) {
-      return {
+      return res.status(200).json({
         success: false,
         output: stdout,
         error: stderr,
-      };
+      });
     }
 
     // Status 5 = Time Limit Exceeded
     if (statusId === 5) {
-      return {
+      return res.status(200).json({
         success: false,
         error: "Time Limit Exceeded",
-      };
+      });
     }
 
     // Status 3 = Accepted
     if (statusId === 3) {
-      return {
+      return res.status(200).json({
         success: true,
         output: stdout || "No output",
-      };
+      });
     }
 
     // Any other status
-    return {
+    return res.status(200).json({
       success: false,
       error: data.status?.description || "Unknown error",
       output: stdout,
-    };
+    });
   } catch (error) {
-    return {
+    console.error("Code execution error:", error);
+    return res.status(500).json({
       success: false,
-      error: `Failed to execute code: ${error.message}`,
-    };
+      error: "Failed to execute code on server.",
+    });
   }
-}
+};
