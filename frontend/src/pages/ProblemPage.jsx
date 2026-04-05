@@ -5,7 +5,7 @@ import confetti from "canvas-confetti";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { PROBLEMS } from "../data/problems";
-import { executeCode } from "../lib/piston";
+import { codeApi } from "../api/code";
 
 import Navbar from "../components/Navbar";
 import ProblemDescription from "../components/ProblemDescription";
@@ -71,7 +71,7 @@ function ProblemPage() {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(
+    const result = await codeApi.runCode(
       selectedLanguage,
       codeRef.current,
       customInput
