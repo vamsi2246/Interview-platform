@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-react";
+import { useUser, SignInButton } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
@@ -7,7 +7,7 @@ import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Loader2Icon, LogOutIcon, PhoneOffIcon, LinkIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon, PhoneOffIcon, LinkIcon, LogInIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
 import toast from "react-hot-toast";
@@ -18,7 +18,7 @@ import VideoCallUI from "../components/VideoCallUI";
 function SessionPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user } = useUser();
+  const { user, isSignedIn } = useUser();
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -30,8 +30,8 @@ function SessionPage() {
   const session = sessionData?.session;
   // Check if user is host. They could be populated (host.clerkId) or unpopulated (host string ObjectId)
   // or it could be evaluating against the MongoDB _id. Let's make it robust against both Clerk ID and Mongo ID.
-  const isHost = session?.host?.clerkId === user?.id || session?.host === user?.id;
-  const isParticipant = session?.participant?.clerkId === user?.id || session?.participant === user?.id;
+  const isHost = isSignedIn && (session?.host?.clerkId === user?.id || session?.host === user?.id);
+  const isParticipant = isSignedIn && (session?.participant?.clerkId === user?.id || session?.participant === user?.id);
 
   const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
     session,
@@ -48,22 +48,22 @@ function SessionPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
 
-  // auto-join session if user is not already a participant and not the host
+  // auto-join session if user is signed in, not already a participant, and not the host
   useEffect(() => {
-    if (!session || !user || loadingSession) return;
+    if (!session || !user || !isSignedIn || loadingSession) return;
     if (isHost || isParticipant) return;
 
     joinSessionMutation.mutate(id, { onSuccess: refetch });
 
     // remove the joinSessionMutation, refetch from dependencies to avoid infinite loop
-  }, [session, user, loadingSession, isHost, isParticipant, id]);
+  }, [session, user, isSignedIn, loadingSession, isHost, isParticipant, id]);
 
   // redirect the "participant" when session ends
   useEffect(() => {
     if (!session || loadingSession) return;
 
-    if (session.status === "completed") navigate("/dashboard");
-  }, [session, loadingSession, navigate]);
+    if (session.status === "completed" && isSignedIn) navigate("/dashboard");
+  }, [session, loadingSession, navigate, isSignedIn]);
 
   // update code when problem loads or changes
   useEffect(() => {
@@ -106,6 +106,21 @@ function SessionPage() {
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
 
+      {/* Guest banner — shown when user is not signed in */}
+      {!isSignedIn && (
+        <div className="bg-warning/10 border-b border-warning/30 px-4 py-3 flex items-center justify-center gap-3">
+          <LogInIcon className="w-5 h-5 text-warning" />
+          <span className="text-sm text-warning-content font-medium">
+            You are viewing this session as a guest.{" "}
+            <SignInButton mode="modal">
+              <button className="btn btn-warning btn-xs gap-1 ml-1">
+                Sign in to participate
+              </button>
+            </SignInButton>
+          </span>
+        </div>
+      )}
+
       <div className="flex-1">
         <PanelGroup direction="horizontal">
           {/* LEFT PANEL - CODE EDITOR & PROBLEM DETAILS */}
@@ -136,8 +151,8 @@ function SessionPage() {
                             session?.difficulty
                           )}`}
                         >
-                          {session?.difficulty.slice(0, 1).toUpperCase() +
-                            session?.difficulty.slice(1) || "Easy"}
+                          {session?.difficulty?.slice(0, 1).toUpperCase() +
+                            session?.difficulty?.slice(1) || "Easy"}
                         </span>
                         
                         <button
@@ -274,7 +289,28 @@ function SessionPage() {
           {/* RIGHT PANEL - VIDEO CALLS & CHAT */}
           <Panel defaultSize={50} minSize={30}>
             <div className="h-full bg-base-200 p-4 overflow-auto">
-              {isInitializingCall ? (
+              {!isSignedIn ? (
+                /* Guest view — prompt to sign in for video/chat */
+                <div className="h-full flex items-center justify-center">
+                  <div className="card bg-base-100 shadow-xl max-w-md">
+                    <div className="card-body items-center text-center">
+                      <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <LogInIcon className="w-12 h-12 text-primary" />
+                      </div>
+                      <h2 className="card-title text-2xl">Sign In Required</h2>
+                      <p className="text-base-content/70 mb-4">
+                        Sign in to join the video call, chat, and participate in this session.
+                      </p>
+                      <SignInButton mode="modal">
+                        <button className="btn btn-primary gap-2">
+                          <LogInIcon className="w-4 h-4" />
+                          Sign In to Participate
+                        </button>
+                      </SignInButton>
+                    </div>
+                  </div>
+                </div>
+              ) : isInitializingCall ? (
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center">
                     <Loader2Icon className="w-12 h-12 mx-auto animate-spin text-primary mb-4" />
