@@ -8,6 +8,9 @@ import DashboardPage from './pages/DashboardPage.jsx'
 import ProblemPage from './pages/ProblemPage.jsx'
 import SessionPage from './pages/SessionPage.jsx'
 import PlaygroundPage from './pages/PlaygroundPage.jsx'
+import MockInterviewSetupPage from './pages/MockInterviewSetupPage.jsx'
+import MockInterviewPage from './pages/MockInterviewPage.jsx'
+import MockInterviewResultPage from './pages/MockInterviewResultPage.jsx'
 import { setClerkGetToken } from './lib/axios';
 
 function App() {
@@ -34,6 +37,9 @@ function App() {
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/session/:id" element={<SessionPage />} />
         <Route path="/playground" element={<PlaygroundPage />} />
+        <Route path="/mock-interview/:id/setup" element={isSignedIn ? <MockInterviewSetupPage /> : <Navigate to="/" />} />
+        <Route path="/mock-interview/:id/result" element={isSignedIn ? <MockInterviewResultPage /> : <Navigate to="/" />} />
+        <Route path="/mock-interview/:id" element={isSignedIn ? <MockInterviewPage /> : <Navigate to="/" />} />
       </Routes>
 
       <Toaster position="top-right" />
