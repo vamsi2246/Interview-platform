@@ -130,7 +130,7 @@ export class InterviewService {
 
     // Build a lookup map: questionId → question text
     const questionMap = new Map(
-      interview.questions.map((q) => [q._id.toString(), q.text])
+      interview.questions.map((q) => [q._id!.toString(), q.text])
     );
 
     // Fire feedback requests sequentially to avoid rate-limit bursts

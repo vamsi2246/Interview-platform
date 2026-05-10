@@ -10,13 +10,16 @@ import { CustomError } from "../utils/CustomError.js";
  */
 export class AIService {
   private readonly client: OpenAI;
-  private readonly model = "gpt-4o-mini";
+  private readonly model = "llama-3.1-8b-instant";
 
   constructor() {
-    if (!ENV.OPENAI_API_KEY) {
-      throw new CustomError("OPENAI_API_KEY is not configured", 500);
+    if (!ENV.GROQ_API_KEY) {
+      throw new CustomError("GROQ_API_KEY is not configured", 500);
     }
-    this.client = new OpenAI({ apiKey: ENV.OPENAI_API_KEY });
+    this.client = new OpenAI({ 
+      apiKey: ENV.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1"
+    });
   }
 
   /**
@@ -66,7 +69,6 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
       }
 
       return arr.slice(0, 5).map((q, i) => ({
-        _id: `q_${Date.now()}_${i}`,
         text: q.text,
         order: q.order ?? i + 1,
       }));

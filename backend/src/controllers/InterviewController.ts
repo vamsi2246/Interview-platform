@@ -77,7 +77,7 @@ export class InterviewController extends BaseController {
       }
 
       const interview = await this.interviewService.getInterviewById(
-        req.params.id,
+        req.params.id as string,
         req.user._id.toString()
       );
 
@@ -102,7 +102,7 @@ export class InterviewController extends BaseController {
       const { questionId, answerText } = req.body;
 
       const interview = await this.interviewService.saveAnswer(
-        req.params.id,
+        req.params.id as string,
         req.user._id.toString(),
         questionId,
         answerText
@@ -127,7 +127,7 @@ export class InterviewController extends BaseController {
       }
 
       const interview = await this.interviewService.generateAndSaveFeedback(
-        req.params.id,
+        req.params.id as string,
         req.user._id.toString()
       );
 

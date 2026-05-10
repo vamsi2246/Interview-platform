@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Briefcase, Layers, Clock } from "lucide-react";
+import { X, Briefcase, Layers, Clock, Sparkles } from "lucide-react";
 
 const TECH_STACKS = [
   "React", "Node.js", "Python", "Java", "TypeScript", "Go",
@@ -24,14 +24,29 @@ function NewInterviewModal({ isOpen, onClose, onCreate, isCreating }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Backdrop — disabled while creating to prevent accidental close */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={isCreating ? undefined : onClose}
       />
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-md glass-card p-6 rounded-2xl shadow-2xl">
+
+        {/* AI Generating overlay */}
+        {isCreating && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-base-300/90 rounded-2xl gap-4">
+            <div className="relative">
+              <span className="loading loading-spinner loading-lg text-primary" />
+              <Sparkles className="w-5 h-5 text-primary absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-base-content text-lg">AI is generating your questions...</p>
+              <p className="text-sm text-base-content/50 mt-1">This takes about 10–15 seconds. Please wait.</p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -43,6 +58,7 @@ function NewInterviewModal({ isOpen, onClose, onCreate, isCreating }) {
           <button
             className="btn btn-ghost btn-sm btn-circle"
             onClick={onClose}
+            disabled={isCreating}
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -66,6 +82,7 @@ function NewInterviewModal({ isOpen, onClose, onCreate, isCreating }) {
               className="input input-bordered w-full bg-base-200"
               value={form.role}
               onChange={handleChange}
+              disabled={isCreating}
               required
             />
           </div>
@@ -86,6 +103,7 @@ function NewInterviewModal({ isOpen, onClose, onCreate, isCreating }) {
               className="input input-bordered w-full bg-base-200"
               value={form.techStack}
               onChange={handleChange}
+              disabled={isCreating}
               list="tech-stack-list"
               required
             />
@@ -112,12 +130,14 @@ function NewInterviewModal({ isOpen, onClose, onCreate, isCreating }) {
               className="input input-bordered w-full bg-base-200"
               value={form.experience}
               onChange={handleChange}
+              disabled={isCreating}
               required
             />
           </div>
 
           {/* Info note */}
           <div className="alert alert-info py-2 text-sm">
+            <Sparkles className="w-4 h-4 shrink-0" />
             <span>Questions are generated using AI based on your profile.</span>
           </div>
 

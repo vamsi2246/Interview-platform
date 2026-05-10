@@ -2,7 +2,7 @@ import { Document } from "mongoose";
 import { IUser } from "./IUser.js";
 
 export interface IQuestion {
-  _id: string;
+  _id?: string;
   text: string;
   order: number;
 }

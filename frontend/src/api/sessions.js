@@ -2,12 +2,12 @@ import axiosInstance from "../lib/axios";
 
 export const sessionApi = {
     getStreamToken: async () => {
-        const res = await axiosInstance.get("/session/stream-token");
+        const res = await axiosInstance.get("/session/token");
         return res.data;
     },
 
     createSession: async (data) => {
-        const res = await axiosInstance.post("/session", data);
+        const res = await axiosInstance.post("/session/create", data);
         return res.data;
     },
 

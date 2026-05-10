@@ -12,5 +12,6 @@ export const ENV = {
   CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY || "",
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY || "",
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+  GROQ_API_KEY: process.env.GROQ_API_KEY || "",
 };
+// force restart
