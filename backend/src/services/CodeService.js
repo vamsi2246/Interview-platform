@@ -2,28 +2,15 @@ import { CustomError } from "../utils/CustomError.js";
 
 const JUDGE0_API = "https://ce.judge0.com";
 
-const LANGUAGE_IDS: Record<string, number> = {
+const LANGUAGE_IDS = {
   javascript: 63, // Node.js 12.14.0
   python: 71,     // Python 3.8.1
   java: 62,       // Java (OpenJDK 13.0.1)
   cpp: 54,        // C++ (GCC 9.2.0)
 };
 
-export interface RunCodeData {
-  language: string;
-  code: string;
-  stdin?: string;
-}
-
-export interface RunCodeResponse {
-  success: boolean;
-  output?: string;
-  error?: string;
-}
-
-export class CodeService {
-  public async executeCode({ language, code, stdin }: RunCodeData): Promise<RunCodeResponse> {
-    if (!language || !code) {
+export async function executeCode({ language, code, stdin }) {
+  if (!language || !code) {
       throw new CustomError("Language and code are required.", 400);
     }
 
@@ -82,6 +69,5 @@ export class CodeService {
     } catch (error) {
       console.error("Code execution error:", error);
       throw new CustomError("Failed to execute code on server.", 500);
-    }
   }
 }

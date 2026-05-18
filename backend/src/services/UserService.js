@@ -1,12 +1,10 @@
 import { clerkClient } from '@clerk/express';
 import User from '../models/User.js';
 import { upsertStream } from '../config/stream.js';
-import { IUser } from '../interfaces/IUser.js';
 import { CustomError } from '../utils/CustomError.js';
 
-export class UserService {
-  public async getUser(clerkId: string): Promise<IUser> {
-    let user = await User.findOne({ clerkId });
+export async function getUser(clerkId) {
+  let user = await User.findOne({ clerkId });
 
     // Sync on the fly for local dev if not found
     if (!user) {
@@ -37,6 +35,5 @@ export class UserService {
       }
     }
 
-    return user;
-  }
+  return user;
 }

@@ -1,11 +1,7 @@
-import { Response, NextFunction } from 'express';
-import { AuthRequest } from '../interfaces/AuthRequest.js';
-import { UserService } from '../services/UserService.js';
+import { getUser } from '../services/UserService.js';
 import { CustomError } from '../utils/CustomError.js';
 
-const userService = new UserService();
-
-export const protectRoute = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const protectRoute = async (req, res, next) => {
   try {
     const auth = req.auth ? req.auth() : null;
     const clerkId = auth?.userId;

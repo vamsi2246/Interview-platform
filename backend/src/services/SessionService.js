@@ -1,34 +1,18 @@
 import { chatClient, streamClient } from "../config/stream.js";
 import Session from "../models/Session.js";
 import { CustomError } from "../utils/CustomError.js";
-import { ISession, DifficultyLevel } from "../interfaces/ISession.js";
 
-export interface CreateSessionDTO {
-  problem: string;
-  difficulty: string;
-  userId: string; // the database _id
-  clerkId: string;
+export function getStreamToken(userId) {
+  return streamClient.generateUserToken({ user_id: userId });
 }
 
-export class SessionService {
-  /**
-   * Generates a stream user token for the given clerk ID
-   */
-  public getStreamToken(userId: string): string {
-    return streamClient.generateUserToken({ user_id: userId });
-  }
-
-  /**
-   * Creates a new session in DB, Stream Video, and Stream Chat channels
-   */
-  public async createSession(dto: CreateSessionDTO): Promise<ISession> {
-    const { problem, difficulty, userId, clerkId } = dto;
+export async function createSession({ problem, difficulty, userId, clerkId }) {
 
     if (!problem || !difficulty) {
       throw new CustomError("Problem and difficulty are required", 400);
     }
 
-    const normalizedDifficulty = difficulty.toLowerCase() as DifficultyLevel;
+    const normalizedDifficulty = difficulty.toLowerCase();
 
     // generate a unique call id for stream video
     const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -55,7 +39,7 @@ export class SessionService {
         name: `${problem} Session`,
         created_by_id: clerkId,
         members: [clerkId],
-      } as any);
+      });
 
       await channel.create();
     } catch (streamError) {
@@ -68,10 +52,7 @@ export class SessionService {
     return session;
   }
 
-  /**
-   * Get active sessions
-   */
-  public async getActiveSessions(): Promise<ISession[]> {
+export async function getActiveSessions() {
     return Session.find({ status: "active" })
       .populate("host", "name profileImage email clerkId")
       .populate("participant", "name profileImage email clerkId")
@@ -79,10 +60,7 @@ export class SessionService {
       .limit(20);
   }
 
-  /**
-   * Get my completed recent sessions
-   */
-  public async getMyRecentSessions(userId: string): Promise<ISession[]> {
+export async function getMyRecentSessions(userId) {
     return Session.find({
       status: "completed",
       $or: [{ host: userId }, { participant: userId }],
@@ -93,10 +71,7 @@ export class SessionService {
       .limit(20);
   }
 
-  /**
-   * Get a session by its DB ID
-   */
-  public async getSessionById(sessionId: string): Promise<ISession> {
+export async function getSessionById(sessionId) {
     const session = await Session.findById(sessionId)
       .populate("host", "name email profileImage clerkId")
       .populate("participant", "name email profileImage clerkId");
@@ -108,10 +83,7 @@ export class SessionService {
     return session;
   }
 
-  /**
-   * Join an active session
-   */
-  public async joinSession(sessionId: string, userId: string, clerkId: string): Promise<ISession> {
+export async function joinSession(sessionId, userId, clerkId) {
     const session = await Session.findById(sessionId);
 
     if (!session) throw new CustomError("Session not found", 404);
@@ -137,10 +109,7 @@ export class SessionService {
     return session;
   }
 
-  /**
-   * Ends a session and cleans up stream calls/channels
-   */
-  public async endSession(sessionId: string, userId: string): Promise<ISession> {
+export async function endSession(sessionId, userId) {
     const session = await Session.findById(sessionId);
 
     if (!session) throw new CustomError("Session not found", 404);
@@ -169,10 +138,7 @@ export class SessionService {
     return session;
   }
 
-  /**
-   * Deletes a session entirely
-   */
-  public async deleteSession(sessionId: string, userId: string): Promise<void> {
+export async function deleteSession(sessionId, userId) {
     const session = await Session.findById(sessionId);
 
     if (!session) throw new CustomError("Session not found", 404);
@@ -198,4 +164,3 @@ export class SessionService {
 
     await Session.findByIdAndDelete(sessionId);
   }
-}

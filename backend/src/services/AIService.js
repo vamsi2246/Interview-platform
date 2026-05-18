@@ -1,35 +1,25 @@
 import OpenAI from "openai";
 import { ENV } from "../config/env.js";
-import { IQuestion, IFeedback } from "../interfaces/IMockInterview.js";
 import { CustomError } from "../utils/CustomError.js";
 
-/**
- * AIService encapsulates all OpenAI interactions.
- * It is intentionally decoupled from Express and MongoDB —
- * it only receives plain data and returns plain data.
- */
-export class AIService {
-  private readonly client: OpenAI;
-  private readonly model = "llama-3.1-8b-instant";
+const MODEL = "llama-3.1-8b-instant";
+let clientInstance = null;
 
-  constructor() {
+function getClient() {
+  if (!clientInstance) {
     if (!ENV.GROQ_API_KEY) {
       throw new CustomError("GROQ_API_KEY is not configured", 500);
     }
-    this.client = new OpenAI({ 
+    clientInstance = new OpenAI({ 
       apiKey: ENV.GROQ_API_KEY,
       baseURL: "https://api.groq.com/openai/v1"
     });
   }
+  return clientInstance;
+}
 
-  /**
-   * Generates 5 interview questions tailored to the candidate's profile.
-   */
-  public async generateQuestions(
-    role: string,
-    techStack: string,
-    experience: number
-  ): Promise<IQuestion[]> {
+export async function generateQuestions(role, techStack, experience) {
+  const client = getClient();
     const prompt = `You are a senior technical interviewer.
 Generate exactly 5 interview questions for a ${role} candidate with ${experience} year(s) of experience in ${techStack}.
 
@@ -49,8 +39,8 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
 ]`;
 
     try {
-      const response = await this.client.chat.completions.create({
-        model: this.model,
+      const response = await client.chat.completions.create({
+        model: MODEL,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         max_tokens: 800,
@@ -61,7 +51,7 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
       const parsed = JSON.parse(raw);
 
       // Handle both { questions: [...] } and direct array wrapped in any key
-      const arr: Array<{ order: number; text: string }> =
+      const arr =
         Array.isArray(parsed) ? parsed : Object.values(parsed).find(Array.isArray) || [];
 
       if (!arr.length) {
@@ -79,13 +69,8 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
     }
   }
 
-  /**
-   * Evaluates a candidate's answer and returns structured feedback.
-   */
-  public async generateFeedback(
-    question: string,
-    userAnswer: string
-  ): Promise<Omit<IFeedback, "questionId">> {
+export async function generateFeedback(question, userAnswer) {
+  const client = getClient();
     const prompt = `You are a strict but fair technical interviewer evaluating a candidate's answer.
 
 Question: ${question}
@@ -102,8 +87,8 @@ Evaluate the answer and return ONLY valid JSON (no markdown, no extra text) with
 Rating scale: 1-3 = poor, 4-5 = basic, 6-7 = good, 8-9 = excellent, 10 = perfect`;
 
     try {
-      const response = await this.client.chat.completions.create({
-        model: this.model,
+      const response = await client.chat.completions.create({
+        model: MODEL,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.4,
         max_tokens: 600,
@@ -124,4 +109,3 @@ Rating scale: 1-3 = poor, 4-5 = basic, 6-7 = good, 8-9 = excellent, 10 = perfect
       throw new CustomError("Failed to generate feedback", 500);
     }
   }
-}

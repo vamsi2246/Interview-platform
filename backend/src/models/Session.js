@@ -1,7 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import { ISession } from "../interfaces/ISession.js";
 
-const sessionSchema = new Schema<ISession>(
+const sessionSchema = new Schema(
   {
     problem: {
       type: String,
@@ -35,5 +34,5 @@ const sessionSchema = new Schema<ISession>(
   { timestamps: true }
 );
 
-const Session = mongoose.model<ISession>("Session", sessionSchema);
+const Session = mongoose.model("Session", sessionSchema);
 export default Session;

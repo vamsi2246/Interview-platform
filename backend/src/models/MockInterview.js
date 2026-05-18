@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { IMockInterview } from "../interfaces/IMockInterview.js";
 
 const questionSchema = new Schema(
   {
@@ -28,7 +27,7 @@ const feedbackSchema = new Schema(
   { _id: false }
 );
 
-const mockInterviewSchema = new Schema<IMockInterview>(
+const mockInterviewSchema = new Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -51,7 +50,7 @@ const mockInterviewSchema = new Schema<IMockInterview>(
   { timestamps: true }
 );
 
-const MockInterview = mongoose.model<IMockInterview>(
+const MockInterview = mongoose.model(
   "MockInterview",
   mockInterviewSchema
 );
