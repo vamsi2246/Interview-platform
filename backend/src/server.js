@@ -17,6 +17,17 @@ const app = express();
 
 app.use(express.json());
 
+// Request logger for production debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
+// Health check — used by Render, UptimeRobot, etc.
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 const allowedOrigins = [
   ENV.CLIENT_URL,
   "http://localhost:5173",
@@ -58,12 +69,16 @@ app.use(errorHandler);
 
 const startServer = async () => {
   try {
+    console.log("🚀 Starting server...");
     await connectDB();
     app.listen(ENV.PORT, () => {
-      console.log(`Server running on port: ${ENV.PORT}`);
+      console.log(`✅ Server running on port: ${ENV.PORT}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`🔗 Client URL: ${ENV.CLIENT_URL}`);
     });
   } catch (error) {
-    console.error("Error in starting the server", error);
+    console.error("❌ Error starting server:", error.message);
+    process.exit(1);
   }
 };
 
