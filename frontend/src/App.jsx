@@ -12,6 +12,7 @@ import MockInterviewSetupPage from './pages/MockInterviewSetupPage.jsx'
 import MockInterviewPage from './pages/MockInterviewPage.jsx'
 import MockInterviewResultPage from './pages/MockInterviewResultPage.jsx'
 import { setClerkGetToken } from './lib/axios';
+import ServerWakeupBanner from './components/ServerWakeupBanner.jsx';
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
@@ -43,6 +44,7 @@ function App() {
       </Routes>
 
       <Toaster position="top-right" />
+      <ServerWakeupBanner />
     </>
 
   )
