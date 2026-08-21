@@ -76,10 +76,12 @@ export default function PlaygroundPage() {
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
-
-    const result = await codeApi.runCode(selectedLanguage, code, customInput);
-    setOutput(result);
-    setIsRunning(false);
+    try {
+      const result = await codeApi.runCode(selectedLanguage, code, customInput);
+      setOutput(result);
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (

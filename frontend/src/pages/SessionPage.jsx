@@ -71,10 +71,10 @@ function SessionPage() {
 
   // update code when problem loads or changes
   useEffect(() => {
-    if (problemData?.starterCode?.[selectedLanguage]) {
+    if (problemData?.starterCode?.[selectedLanguage] && !code) {
       setCode(problemData.starterCode[selectedLanguage]);
     }
-  }, [problemData, selectedLanguage]);
+  }, [problemData, selectedLanguage, code]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
@@ -87,10 +87,12 @@ function SessionPage() {
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
-
-    const result = await codeApi.runCode(selectedLanguage, code, customInput);
-    setOutput(result);
-    setIsRunning(false);
+    try {
+      const result = await codeApi.runCode(selectedLanguage, code, customInput);
+      setOutput(result);
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   const handleEndSession = () => {

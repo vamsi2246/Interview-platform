@@ -68,6 +68,11 @@ export async function executeCode({ language, code, stdin }) {
       return { success: false, error: data.status?.description || "Unknown error", output: stdout };
     } catch (error) {
       console.error("Code execution error:", error);
+      // Preserve validation/upstream status codes so callers can distinguish
+      // rejected input from an unavailable execution service.
+      if (error instanceof CustomError) {
+        throw error;
+      }
       throw new CustomError("Failed to execute code on server.", 500);
   }
 }

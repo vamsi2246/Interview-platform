@@ -14,12 +14,14 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
   // Refs to track instances for cleanup and leaveSession
   const videoCallRef = useRef(null);
   const chatClientRef = useRef(null);
+  const callId = session?.callId;
+  const sessionStatus = session?.status;
 
   useEffect(() => {
     const initCall = async () => {
-      if (!session?.callId) return;
+      if (!callId) return;
       if (!isHost && !isParticipant) return;
-      if (session.status === "completed") return;
+      if (sessionStatus === "completed") return;
 
       try {
         const { token, userId, userName, userImage } = await sessionApi.getStreamToken();
@@ -35,7 +37,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
 
         setStreamClient(client);
 
-        const videoCall = client.call("default", session.callId);
+        const videoCall = client.call("default", callId);
         await videoCall.join({ create: true });
         setCall(videoCall);
         videoCallRef.current = videoCall;
@@ -54,7 +56,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         setChatClient(chatClientInstance);
         chatClientRef.current = chatClientInstance;
 
-        const chatChannel = chatClientInstance.channel("messaging", session.callId);
+        const chatChannel = chatClientInstance.channel("messaging", callId);
         await chatChannel.watch();
         setChannel(chatChannel);
       } catch (error) {
@@ -65,7 +67,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
       }
     };
 
-    if (session && !loadingSession) initCall();
+    if (callId && !loadingSession) initCall();
 
     // cleanup on unmount
     return () => {
@@ -79,7 +81,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         }
       })();
     };
-  }, [session, loadingSession, isHost, isParticipant]);
+  }, [callId, sessionStatus, loadingSession, isHost, isParticipant]);
 
   // Explicit leave function for "Leave Session" button
   const leaveSession = useCallback(async () => {

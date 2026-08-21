@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useInterviewById, useSaveAnswer, useGenerateFeedback } from "../hooks/useMockInterview";
 import Navbar from "../components/Navbar";
@@ -36,14 +36,6 @@ function MockInterviewPage() {
   const saveAnswerMutation = useSaveAnswer();
   const feedbackMutation = useGenerateFeedback();
 
-  // Populate saved answers on load
-  useEffect(() => {
-    if (!interview) return;
-    const existing = {};
-    interview.answers?.forEach((a) => { existing[a.questionId] = a.text; });
-    setAnswers(existing);
-  }, [interview]);
-
   if (isLoading)
     return (
       <div className="min-h-screen bg-base-300 flex items-center justify-center">
@@ -58,10 +50,16 @@ function MockInterviewPage() {
       </div>
     );
 
-  const questions = interview.questions.sort((a, b) => a.order - b.order);
+  // React Query data is shared cache state, so never sort the original array in place.
+  const questions = [...interview.questions].sort((a, b) => a.order - b.order);
+  const savedAnswers = new Map(
+    (interview.answers || []).map((answer) => [answer.questionId, answer.text])
+  );
   const currentQuestion = questions[currentIdx];
   const currentQId = currentQuestion._id.toString();
   const totalQ = questions.length;
+  const getAnswerText = (questionId) => answers[questionId] ?? savedAnswers.get(questionId) ?? "";
+  const isAnswerSaved = (questionId) => Boolean(saveStates[questionId]) || savedAnswers.has(questionId);
 
   // ── Speech recognition ──────────────────────────────────────────────────
   const startRecording = () => {
@@ -76,7 +74,7 @@ function MockInterviewPage() {
     recognition.interimResults = true;
     recognition.lang = "en-US";
 
-    let finalTranscript = answers[currentQId] || "";
+    let finalTranscript = getAnswerText(currentQId);
 
     recognition.onresult = (event) => {
       let interim = "";
@@ -109,7 +107,7 @@ function MockInterviewPage() {
 
   // ── Save single answer ──────────────────────────────────────────────────
   const handleSaveAnswer = () => {
-    const text = answers[currentQId] || "";
+    const text = getAnswerText(currentQId);
     if (!text.trim()) {
       toast.error("Please record or type an answer first.");
       return;
@@ -138,7 +136,12 @@ function MockInterviewPage() {
     });
   };
 
-  const savedCount = Object.values(saveStates).filter(Boolean).length;
+  const savedCount = new Set([
+    ...savedAnswers.keys(),
+    ...Object.entries(saveStates)
+      .filter(([, isSaved]) => isSaved)
+      .map(([questionId]) => questionId),
+  ]).size;
 
   return (
     <div className="min-h-screen bg-base-300 flex flex-col">
@@ -161,11 +164,11 @@ function MockInterviewPage() {
                 id={`question-tab-${idx + 1}`}
                 className={`btn btn-sm rounded-full ${
                   idx === currentIdx ? "btn-primary" : "btn-ghost"
-                } ${saveStates[qId] ? "ring-2 ring-success ring-offset-1" : ""}`}
+                } ${isAnswerSaved(qId) ? "ring-2 ring-success ring-offset-1" : ""}`}
                 onClick={() => setCurrentIdx(idx)}
               >
                 Q{idx + 1}
-                {saveStates[qId] && (
+                {isAnswerSaved(qId) && (
                   <CheckCircle className="w-3 h-3 text-success" />
                 )}
               </button>
@@ -202,7 +205,7 @@ function MockInterviewPage() {
               id={`answer-textarea-${currentIdx + 1}`}
               className="textarea textarea-bordered bg-base-200 w-full flex-1 min-h-36 resize-none text-sm"
               placeholder="Record your answer using the mic button below, or type it directly..."
-              value={answers[currentQId] || ""}
+              value={getAnswerText(currentQId)}
               onChange={(e) =>
                 setAnswers((prev) => ({ ...prev, [currentQId]: e.target.value }))
               }
@@ -247,7 +250,7 @@ function MockInterviewPage() {
             </button>
 
             {/* Saved indicator */}
-            {saveStates[currentQId] && (
+            {isAnswerSaved(currentQId) && (
               <span className="text-success text-sm flex items-center gap-1">
                 <CheckCircle className="w-4 h-4" /> Saved
               </span>

@@ -70,32 +70,34 @@ function ProblemPage() {
   async function handleRunCode() {
     setIsRunning(true);
     setOutput(null);
+    try {
+      const result = await codeApi.runCode(
+        selectedLanguage,
+        codeRef.current,
+        customInput
+      );
 
-    const result = await codeApi.runCode(
-      selectedLanguage,
-      codeRef.current,
-      customInput
-    );
+      setOutput(result);
 
-    setOutput(result);
-    setIsRunning(false);
+      if (!result.success) {
+        toast.error("Code execution failed!");
+        return;
+      }
 
-    if (!result.success) {
-      toast.error("Code execution failed!");
-      return;
-    }
+      const expected = currentProblem?.expectedOutput?.[selectedLanguage];
+      if (!expected) {
+        toast("No expected output for this problem yet.", { icon: "ℹ️" });
+        return;
+      }
 
-    const expected = currentProblem?.expectedOutput?.[selectedLanguage];
-    if (!expected) {
-      toast("No expected output for this problem yet.", { icon: "ℹ️" });
-      return;
-    }
-
-    if (matchesExpected(result.output, expected)) {
-      fireConfetti();
-      toast.success("All tests passed! Great job!");
-    } else {
-      toast.error("Tests failed. Check your output!");
+      if (matchesExpected(result.output, expected)) {
+        fireConfetti();
+        toast.success("All tests passed! Great job!");
+      } else {
+        toast.error("Tests failed. Check your output!");
+      }
+    } finally {
+      setIsRunning(false);
     }
   }
 
